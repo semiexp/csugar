@@ -14,8 +14,9 @@ public:
     virtual int GetLowerBound() const;
     virtual int GetUpperBound() const;
 
-    virtual std::shared_ptr<Domain> Add(std::shared_ptr<Domain> other) const;
-    virtual std::shared_ptr<Domain> Sub(std::shared_ptr<Domain> other) const;
+    virtual std::unique_ptr<Domain> Add(std::unique_ptr<Domain>& other) const;
+    virtual std::unique_ptr<Domain> Sub(std::unique_ptr<Domain>& other) const;
+    virtual std::unique_ptr<Domain> Cup(std::unique_ptr<Domain>& other) const;
 };
 
 }

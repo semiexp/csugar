@@ -78,9 +78,22 @@ public:
     static std::shared_ptr<Expr> Or(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b) {
         return Expr::Make(kOr, {a, b});
     }
+    static std::shared_ptr<Expr> Eq(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b) {
+        return Expr::Make(kEq, {a, b});
+    }
     static std::shared_ptr<Expr> ConstInt(int i) {
         auto ret = Expr::Make(kConstantInt);
         ret->constant_int_ = i;
+        return ret;
+    }
+    static std::shared_ptr<Expr> VarBool(const std::string &name) {
+        auto ret = Expr::Make(kVariableBool);
+        ret->name_ = name;
+        return ret;
+    }
+    static std::shared_ptr<Expr> VarInt(const std::string &name) {
+        auto ret = Expr::Make(kVariableInt);
+        ret->name_ = name;
         return ret;
     }
 private:

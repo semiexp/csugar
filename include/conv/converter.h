@@ -17,12 +17,16 @@ public:
     void Convert(std::shared_ptr<Expr> expr);
 
 private:
-    std::vector<Clause> ConvertConstraint(std::shared_ptr<Expr> expr, bool negative = false);
+    std::vector<Clause> ConvertConstraint(std::shared_ptr<Expr> expr);
+    std::vector<Clause> ConvertConstraint(std::shared_ptr<Expr> expr, bool negative);
     std::shared_ptr<Expr> ConvertLogical(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses);
     std::vector<Clause> ConvertDisj(std::shared_ptr<Expr> expr, bool negative);
     std::shared_ptr<Expr> ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses);
     std::vector<Clause> ConvertComparison(std::shared_ptr<Expr> x, std::shared_ptr<Expr> y, LinearLiteralOp op);
-    LinearSum ConvertFormula(std::shared_ptr<Expr> x);
+    LinearSum ConvertFormula(std::shared_ptr<Expr> expr);
+
+    std::shared_ptr<IntVar> GetEquivalence(std::shared_ptr<Expr> x);
+    void AddEquivalence(std::shared_ptr<IntVar> v, std::shared_ptr<Expr> x);
 
     ICSP icsp_;
 };

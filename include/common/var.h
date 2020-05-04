@@ -22,14 +22,14 @@ private:
 class IntVar
 {
 public:
-    IntVar(std::shared_ptr<Domain> domain, std::string name) : domain_(domain), name_(name) {}
+    IntVar(std::unique_ptr<Domain> &&domain, std::string name) : domain_(std::move(domain)), name_(name) {}
 
-    std::shared_ptr<Domain> domain() { return domain_; }
-    std::shared_ptr<const Domain> domain() const { return domain_; }
+    std::unique_ptr<Domain>& domain() { return domain_; }
+    const std::unique_ptr<Domain>& domain() const { return domain_; }
     std::string name() const { return name_; }
 
 private:
-    std::shared_ptr<Domain> domain_;
+    std::unique_ptr<Domain> domain_;
     std::string name_;
 };
 

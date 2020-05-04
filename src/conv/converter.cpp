@@ -126,8 +126,54 @@ std::vector<Clause> Converter::ConvertComparison(std::shared_ptr<Expr> x, std::s
     LinearSum e = ConvertFormula(Expr::Make(kSub, {x, y}));
     e.Factorize();
 }
-LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> x)
+LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr)
 {
+    if (auto v = GetEquivalence(expr)) {
+        return LinearSum(v);
+    } else if (expr->type() == kConstantInt) {
+        return LinearSum(expr->AsConstantInt());
+    } else if (expr->type() == kVariableInt) {
+        if (!icsp_.HasIntVar(expr->VariableName())) {
+            // TODO: error
+        }
+        return LinearSum(icsp_.GetIntVar(expr->VariableName()));
+    } else if (expr->type() == kAdd) {
+        LinearSum ret(0);
+        for (int i = 0; i < expr->size(); ++i) {
+            ret += ConvertFormula((*expr)[i]);
+        }
+        return ret;
+    } else if (expr->type() == kSub) {
+        if (expr->size() == 0) {
+            // TODO: error
+        } else if (expr->size() == 1) {
+            LinearSum ret = ConvertFormula((*expr)[0]);
+            ret *= -1;
+            return ret;
+        } else {
+            LinearSum ret = ConvertFormula((*expr)[0]);
+            for (int i = 1; i < expr->size(); ++i) {
+                ret -= ConvertFormula((*expr)[i]);
+            }
+            return ret;
+        }
+    } else if (expr->type() == kIf) {
+        auto x1 = (*expr)[0], x2 = (*expr)[1], x3 = (*expr)[2];
+        LinearSum s2 = ConvertFormula(x2), s3 = ConvertFormula(x3);
+        std::unique_ptr<Domain> d2 = s2.GetDomain(), d3 = s3.GetDomain();
+        std::unique_ptr<Domain> d = d2->Cup(d3);
+        auto v = icsp_.AuxiliaryIntVar(std::move(d));
+        auto x = Expr::VarInt(v->name());
+        auto eq = Expr::And(Expr::Or(Expr::Not(x1), Expr::Eq(x, x2)), Expr::Or(x1, Expr::Eq(x, x3)));
+        ConvertConstraint(eq);
+        AddEquivalence(v, expr);
+        return LinearSum(v);
+    } else if (expr->type() == kMul || expr->type() == kDiv || expr->type() == kMod
+            || expr->type() == kPow || expr->type() == kMin || expr->type() == kMax) {
+        // TODO: not implemented yet
+    } else {
+        // TODO: error
+    }
 }
 
 }
