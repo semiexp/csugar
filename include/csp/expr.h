@@ -78,6 +78,11 @@ public:
     static std::shared_ptr<Expr> Or(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b) {
         return Expr::Make(kOr, {a, b});
     }
+    static std::shared_ptr<Expr> ConstInt(int i) {
+        auto ret = Expr::Make(kConstantInt);
+        ret->constant_int_ = i;
+        return ret;
+    }
 private:
     ExprType type_;
     std::vector<std::shared_ptr<Expr>> children_;

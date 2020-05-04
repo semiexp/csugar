@@ -5,6 +5,8 @@
 #include "csp/csp.h"
 #include "csp/expr.h"
 #include "icsp/icsp.h"
+#include "icsp/linear_sum.h"
+#include "icsp/linear_literal.h"
 
 namespace csugar
 {
@@ -19,6 +21,8 @@ private:
     std::shared_ptr<Expr> ConvertLogical(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses);
     std::vector<Clause> ConvertDisj(std::shared_ptr<Expr> expr, bool negative);
     std::shared_ptr<Expr> ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses);
+    std::vector<Clause> ConvertComparison(std::shared_ptr<Expr> x, std::shared_ptr<Expr> y, LinearLiteralOp op);
+    LinearSum ConvertFormula(std::shared_ptr<Expr> x);
 
     ICSP icsp_;
 };

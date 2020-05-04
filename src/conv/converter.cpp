@@ -1,6 +1,8 @@
 #include "conv/converter.h"
 #include "common/var.h"
 #include "icsp/bool_literal.h"
+#include "icsp/linear_sum.h"
+#include "icsp/linear_literal.h"
 
 namespace csugar
 {
@@ -94,6 +96,38 @@ std::vector<Clause> Converter::ConvertDisj(std::shared_ptr<Expr> expr, bool nega
         }
     }
     return clauses;
+}
+std::shared_ptr<Expr> Converter::ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses)
+{
+    // TODO: NORMALIZE_LINEARSUM?
+    if (true) {
+
+    }
+
+    std::vector<Clause> clauses_sub;
+    if ((expr->type() == kEq && !negative) || (expr->type() == kNe && negative)) {
+        clauses_sub = ConvertComparison((*expr)[0], (*expr)[1], kLitEq);
+    } else if ((expr->type() == kNe && !negative) || (expr->type() == kEq && negative)) {
+        clauses_sub = ConvertComparison((*expr)[0], (*expr)[1], kLitNe);
+    } else if ((expr->type() == kLe && !negative) || (expr->type() == kGt && negative)) {
+        clauses_sub = ConvertComparison((*expr)[0], (*expr)[1], kLitLe);
+    } else if ((expr->type() == kLt && !negative) || (expr->type() == kGe && negative)) {
+        clauses_sub = ConvertComparison(Expr::Make(kAdd, {(*expr)[0], Expr::ConstInt(1)}), (*expr)[1], kLitLe);
+    } else if ((expr->type() == kGe && !negative) || (expr->type() == kLt && negative)) {
+        clauses_sub = ConvertComparison((*expr)[0], (*expr)[1], kLitGe);
+    } else if ((expr->type() == kGt && !negative) || (expr->type() == kLe && negative)) {
+        clauses_sub = ConvertComparison((*expr)[0], Expr::Make(kAdd, {(*expr)[1], Expr::ConstInt(1)}), kLitGe);
+    }
+    clauses.insert(clauses.end(), clauses_sub.begin(), clauses_sub.end());
+    return std::shared_ptr<Expr>(nullptr);
+}
+std::vector<Clause> Converter::ConvertComparison(std::shared_ptr<Expr> x, std::shared_ptr<Expr> y, LinearLiteralOp op)
+{
+    LinearSum e = ConvertFormula(Expr::Make(kSub, {x, y}));
+    e.Factorize();
+}
+LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> x)
+{
 }
 
 }

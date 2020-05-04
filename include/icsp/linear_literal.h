@@ -10,7 +10,7 @@ namespace csugar {
 
 enum LinearLiteralOp
 {
-    kEq, kGe, kLe
+    kLitEq, kLitNe, kLitGe, kLitLe
 };
 
 class LinearLiteral : public Literal
