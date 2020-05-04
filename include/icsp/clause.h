@@ -12,6 +12,11 @@ class Clause
 {
 public:
     Clause() {}
+    Clause(std::shared_ptr<Literal> lit) { literals_.push_back(lit); }
+
+    int size() const { return literals_.size(); }
+    std::shared_ptr<Literal> operator[](int i) { return literals_[i]; }
+
     void Add(std::shared_ptr<Literal> p)
     {
         literals_.push_back(p);

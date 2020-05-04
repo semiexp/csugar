@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <memory>
+#include <string>
+#include <initializer_list>
 
 namespace csugar {
 
@@ -39,13 +41,50 @@ enum ExprType
 class Expr
 {
 public:
+    Expr(ExprType type) : type_(type) {}
+    Expr(ExprType type, std::shared_ptr<Expr> expr) : type_(type), children_{expr} {}
+    Expr(ExprType type, std::initializer_list<std::shared_ptr<Expr>> il) : type_(type), children_(il) {}
+
+    ExprType type() const { return type_; }
+    int size() const { return children_.size(); }
+    std::shared_ptr<Expr> operator[](int i) { return children_[i]; }
+    int AsConstantInt() const { return constant_int_; }
+    bool AsConstantBool() const { return constant_bool_; }
+    std::string VariableName() const { return name_; }
+
+    bool IsLogical() const {
+        return type_ == kConstantBool || type_ == kVariableBool || type_ == kNot || type_ == kAnd
+            || type_ == kOr || type_ == kImp || type_ == kXor || type_ == kIff;
+    }
+    bool IsComparison() const {
+        return type_ == kEq || type_ == kNe || type_ == kLe || type_ == kLt || type_ == kGe || type_ == kGt;
+    }
+
+    static std::shared_ptr<Expr> Make(ExprType type) {
+        return std::make_shared<Expr>(type);
+    }
+    static std::shared_ptr<Expr> Make(ExprType type, std::shared_ptr<Expr> expr) {
+        return std::make_shared<Expr>(type, expr);
+    }
+    static std::shared_ptr<Expr> Make(ExprType type, std::initializer_list<std::shared_ptr<Expr>> il) {
+        return std::make_shared<Expr>(type, il);
+    }
+    static std::shared_ptr<Expr> Not(std::shared_ptr<Expr> expr) {
+        return Expr::Make(kNot, expr);
+    }
+    static std::shared_ptr<Expr> And(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b) {
+        return Expr::Make(kAnd, {a, b});
+    }
+    static std::shared_ptr<Expr> Or(std::shared_ptr<Expr> a, std::shared_ptr<Expr> b) {
+        return Expr::Make(kOr, {a, b});
+    }
 private:
     ExprType type_;
+    std::vector<std::shared_ptr<Expr>> children_;
+    std::string name_;
     union {
-        std::vector<std::shared_ptr<Expr>> children_;
         int constant_int_;
         bool constant_bool_;
-        int variable_id_;
     };
 };
 
