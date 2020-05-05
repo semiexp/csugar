@@ -127,6 +127,13 @@ std::shared_ptr<Expr> Converter::ConvertComparison(std::shared_ptr<Expr> expr, b
 std::vector<Clause> Converter::ConvertComparison(std::shared_ptr<Expr> x, std::shared_ptr<Expr> y, LinearLiteralOp op) {
     LinearSum e = ConvertFormula(Expr::Make(kSub, {x, y}));
     e.Factorize();
+    e = ReduceArity(e, op);
+
+    std::shared_ptr<Literal> lit = std::make_shared<LinearLiteral>(e, op);
+    std::vector<Clause> ret;
+    // TODO: check isValid / isUnsatisfiable
+    ret.push_back(lit);
+    return ret;
 }
 LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
     if (auto v = GetEquivalence(expr)) {
@@ -175,6 +182,10 @@ LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
     } else {
         // TODO: error
     }
+}
+LinearSum Converter::ReduceArity(const LinearSum &e, LinearLiteralOp op) {
+    // TODO
+    return e;
 }
 
 }

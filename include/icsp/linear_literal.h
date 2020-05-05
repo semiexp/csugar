@@ -15,7 +15,7 @@ enum LinearLiteralOp {
 
 class LinearLiteral : public Literal {
 public:
-    LinearLiteral() {}
+    LinearLiteral(const LinearSum &sum, LinearLiteralOp op) : sum_(sum), op_(op) {}
 
     std::string str() const;
 

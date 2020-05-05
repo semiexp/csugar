@@ -47,9 +47,14 @@ LinearSum& LinearSum::operator*=(int rhs) {
     return *this;
 }
 std::string LinearSum::str() const {
-    std::string ret;
+    // For reproducibility, variables are sorted by their names
+    std::map<std::string, int> coef_sorted;
     for (auto& it : coef_) {
-        ret += it.first->name();
+        coef_sorted.insert({it.first->name(), it.second});
+    }
+    std::string ret;
+    for (auto& it : coef_sorted) {
+        ret += it.first;
         ret.push_back('*');
         ret += std::to_string(it.second);
         ret.push_back('+');
@@ -58,15 +63,15 @@ std::string LinearSum::str() const {
     return ret;
 }
 void LinearSum::WeightedAdd(const LinearSum& other, int w) {
-    b_ += other.b_;
+    b_ += other.b_ * w;
     for (auto& it : other.coef_) {
         if (coef_.count(it.first) > 0) {
-            coef_[it.first] += it.second;
+            coef_[it.first] += it.second * w;
             if (coef_[it.first] == 0) {
                 coef_.erase(it.first);
             }
         } else {
-            coef_[it.first] = it.second;
+            coef_[it.first] = it.second * w;
         }
     }
 }
