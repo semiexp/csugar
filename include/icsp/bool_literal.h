@@ -12,6 +12,10 @@ class BoolLiteral : public Literal {
 public:
     BoolLiteral(std::shared_ptr<BoolVar> var, bool negative) : var_(var), negative_(negative) {}
 
+    std::shared_ptr<BoolVar> var() const { return var_; }
+    bool negative() const { return negative_; }
+
+    bool IsValid() const override { return false; }
     bool IsSimple() const override { return true; }
 
     std::string str() const {

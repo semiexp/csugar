@@ -24,10 +24,17 @@ public:
     Clause& GetClause(int i) { return clauses_[i]; }
     const Clause& GetClause(int i) const { return clauses_[i]; }
 
+    int NumBoolVars() const { return bool_vars_.size(); }
     bool HasBoolVar(const std::string& name);
     std::shared_ptr<BoolVar> GetBoolVar(const std::string& name);
+    std::shared_ptr<BoolVar> GetBoolVar(int i) { return bool_vars_[i]; }
+    std::shared_ptr<const BoolVar> GetBoolVar(int i) const { return bool_vars_[i]; }
+
+    int NumIntVars() const { return int_vars_.size(); }
     bool HasIntVar(const std::string& name);
     std::shared_ptr<IntVar> GetIntVar(const std::string& name);
+    std::shared_ptr<IntVar> GetIntVar(int i) { return int_vars_[i]; }
+    std::shared_ptr<const IntVar> GetIntVar(int i) const { return int_vars_[i]; }
 
     std::shared_ptr<BoolVar> AuxiliaryBoolVar();
     std::shared_ptr<IntVar> AuxiliaryIntVar(std::unique_ptr<Domain>&& domain);

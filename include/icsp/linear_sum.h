@@ -16,9 +16,14 @@ public:
         coef_.insert({v, 1});
     }
 
+    int size() const { return coef_.size(); }
     std::unique_ptr<Domain> GetDomain();
     void Factorize();
     bool IsSimple() const { return coef_.size() <= 1; }
+
+    const std::map<std::shared_ptr<IntVar>, int>& GetCoef() const { return coef_; }
+    std::map<std::shared_ptr<IntVar>, int>& GetCoef() { return coef_; }
+    int GetB() const { return b_; }
 
     LinearSum& operator+=(const LinearSum& rhs) {
         WeightedAdd(rhs, 1);

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "common/domain.h"
 
 namespace csugar {
@@ -12,6 +14,7 @@ public:
 
     int GetLowerBound() const override;
     int GetUpperBound() const override;
+    std::vector<int> Enumerate() const override;
 
     std::unique_ptr<Domain> Add(const std::unique_ptr<Domain>& other) const override;
     std::unique_ptr<Domain> Sub(const std::unique_ptr<Domain>& other) const override;

@@ -40,9 +40,14 @@ void LinearSum::Factorize() {
     }
 }
 LinearSum& LinearSum::operator*=(int rhs) {
-    b_ *= rhs;
-    for (auto& it : coef_) {
-        it.second *= rhs;
+    if (rhs == 0) {
+        b_ = 0;
+        coef_.clear();
+    } else {
+        b_ *= rhs;
+        for (auto& it : coef_) {
+            it.second *= rhs;
+        }
     }
     return *this;
 }

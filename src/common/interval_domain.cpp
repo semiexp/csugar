@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <vector>
 
 namespace csugar {
 
@@ -13,6 +14,13 @@ int IntervalDomain::GetLowerBound() const {
 }
 int IntervalDomain::GetUpperBound() const {
     return ub_;
+}
+std::vector<int> IntervalDomain::Enumerate() const {
+    std::vector<int> ret;
+    for (int i = lb_; i <= ub_; ++i) {
+        ret.push_back(i);
+    }
+    return ret;
 }
 std::unique_ptr<Domain> IntervalDomain::Add(const std::unique_ptr<Domain>& other) const {
     return std::make_unique<IntervalDomain>(IntervalDomain(lb_ + other->GetLowerBound(), ub_ + other->GetUpperBound()));
