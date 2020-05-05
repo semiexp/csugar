@@ -1,13 +1,15 @@
 #pragma once
 
-namespace csugar
-{
+#include <string>
 
-class Literal
-{
+namespace csugar {
+
+class Literal {
 public:
-    Literal();
+    Literal() {}
     virtual ~Literal() {}
+
+    virtual std::string str() const = 0;
 };
 
 }

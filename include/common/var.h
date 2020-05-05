@@ -8,8 +8,7 @@
 
 namespace csugar {
 
-class BoolVar
-{
+class BoolVar {
 public:
     BoolVar(std::string name) : name_(name) {}
 
@@ -19,8 +18,7 @@ private:
     std::string name_;
 };
 
-class IntVar
-{
+class IntVar {
 public:
     IntVar(std::unique_ptr<Domain> &&domain, std::string name) : domain_(std::move(domain)), name_(name) {}
 

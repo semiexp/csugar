@@ -2,12 +2,12 @@
 
 #include <memory>
 #include <map>
+#include <string>
 
 #include "common/var.h"
 #include "common/domain.h"
 
-namespace csugar
-{
+namespace csugar {
 
 class LinearSum {
 public:
@@ -19,11 +19,21 @@ public:
     std::unique_ptr<Domain> GetDomain();
     void Factorize();
 
-    LinearSum& operator+=(const LinearSum& rhs);
-    LinearSum& operator-=(const LinearSum& rhs);
+    LinearSum& operator+=(const LinearSum& rhs) {
+        WeightedAdd(rhs, 1);
+        return *this;
+    }
+    LinearSum& operator-=(const LinearSum& rhs) {
+        WeightedAdd(rhs, -1);
+        return *this;
+    }
     LinearSum& operator*=(int rhs);
 
+    std::string str() const;
+
 private:
+    void WeightedAdd(const LinearSum& other, int w);
+
     std::map<std::shared_ptr<IntVar>, int> coef_;
     int b_;
 };

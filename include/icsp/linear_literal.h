@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 #include "icsp/literal.h"
 #include "icsp/linear_sum.h"
@@ -8,15 +9,16 @@
 
 namespace csugar {
 
-enum LinearLiteralOp
-{
+enum LinearLiteralOp {
     kLitEq, kLitNe, kLitGe, kLitLe
 };
 
-class LinearLiteral : public Literal
-{
+class LinearLiteral : public Literal {
 public:
     LinearLiteral() {}
+
+    std::string str() const;
+
 private:
     LinearSum sum_;
     LinearLiteralOp op_;

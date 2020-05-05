@@ -1,7 +1,9 @@
+#include "tests.h"
+
 #include <cassert>
 
 int main()
 {
-	// do nothing
+	RunConvertTests();
 	return 0;
 }

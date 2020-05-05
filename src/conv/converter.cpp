@@ -4,11 +4,15 @@
 #include "icsp/linear_sum.h"
 #include "icsp/linear_literal.h"
 
-namespace csugar
-{
+namespace csugar {
 
-std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, bool negative)
-{
+void Converter::ConvertConstraint(std::shared_ptr<Expr> expr) {
+    std::vector<Clause> clauses = ConvertConstraint(expr, false);
+    for (auto&& c : clauses) {
+        icsp_.AddClause(c);
+    }
+}
+std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, bool negative) {
     std::vector<Clause> clauses;
 
     while (true) {
@@ -39,8 +43,7 @@ std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, boo
     }
     return clauses;
 }
-std::shared_ptr<Expr> Converter::ConvertLogical(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses)
-{
+std::shared_ptr<Expr> Converter::ConvertLogical(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses) {
     if (expr->type() == kImp) {
         return Expr::Or(Expr::Not((*expr)[0]), (*expr)[1]);
     } else if (expr->type() == kXor) {
@@ -58,12 +61,12 @@ std::shared_ptr<Expr> Converter::ConvertLogical(std::shared_ptr<Expr> expr, bool
     } else if ((expr->type() == kAnd && negative) || (expr->type() == kOr && !negative)) {
         auto clauses_sub = ConvertDisj(expr, negative);
         clauses.insert(clauses.end(), clauses_sub.begin(), clauses_sub.end());
+        return std::shared_ptr<Expr>(nullptr);
     } else {
         // TODO: error
     }
 }
-std::vector<Clause> Converter::ConvertDisj(std::shared_ptr<Expr> expr, bool negative)
-{
+std::vector<Clause> Converter::ConvertDisj(std::shared_ptr<Expr> expr, bool negative) {
     std::vector<Clause> clauses;
     if (expr->size() == 0) {
         clauses.push_back(Clause());
@@ -94,11 +97,11 @@ std::vector<Clause> Converter::ConvertDisj(std::shared_ptr<Expr> expr, bool nega
                 }
             }
         }
+        clauses.push_back(aux_clause);
     }
     return clauses;
 }
-std::shared_ptr<Expr> Converter::ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses)
-{
+std::shared_ptr<Expr> Converter::ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses) {
     // TODO: NORMALIZE_LINEARSUM?
     if (true) {
 
@@ -121,13 +124,11 @@ std::shared_ptr<Expr> Converter::ConvertComparison(std::shared_ptr<Expr> expr, b
     clauses.insert(clauses.end(), clauses_sub.begin(), clauses_sub.end());
     return std::shared_ptr<Expr>(nullptr);
 }
-std::vector<Clause> Converter::ConvertComparison(std::shared_ptr<Expr> x, std::shared_ptr<Expr> y, LinearLiteralOp op)
-{
+std::vector<Clause> Converter::ConvertComparison(std::shared_ptr<Expr> x, std::shared_ptr<Expr> y, LinearLiteralOp op) {
     LinearSum e = ConvertFormula(Expr::Make(kSub, {x, y}));
     e.Factorize();
 }
-LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr)
-{
+LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
     if (auto v = GetEquivalence(expr)) {
         return LinearSum(v);
     } else if (expr->type() == kConstantInt) {

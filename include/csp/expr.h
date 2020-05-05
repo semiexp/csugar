@@ -7,8 +7,7 @@
 
 namespace csugar {
 
-enum ExprType
-{
+enum ExprType {
     kConstantInt,
     kConstantBool,
     kVariableInt,
@@ -38,8 +37,7 @@ enum ExprType
     kIf,
 };
 
-class Expr
-{
+class Expr {
 public:
     Expr(ExprType type) : type_(type) {}
     Expr(ExprType type, std::shared_ptr<Expr> expr) : type_(type), children_{expr} {}
