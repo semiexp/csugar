@@ -17,6 +17,8 @@ class LinearLiteral : public Literal {
 public:
     LinearLiteral(const LinearSum &sum, LinearLiteralOp op) : sum_(sum), op_(op) {}
 
+    bool IsSimple() const override;
+
     std::string str() const;
 
 private:

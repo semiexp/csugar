@@ -21,6 +21,8 @@ public:
         literals_.push_back(p);
     }
 
+    bool IsSimple() const;
+
     std::string str() const;
 
 private:

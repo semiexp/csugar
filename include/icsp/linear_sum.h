@@ -18,6 +18,7 @@ public:
 
     std::unique_ptr<Domain> GetDomain();
     void Factorize();
+    bool IsSimple() const { return coef_.size() <= 1; }
 
     LinearSum& operator+=(const LinearSum& rhs) {
         WeightedAdd(rhs, 1);

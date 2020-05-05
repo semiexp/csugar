@@ -4,6 +4,10 @@
 
 namespace csugar {
 
+bool LinearLiteral::IsSimple() const {
+    // TODO: log encoding?
+    return sum_.IsSimple();
+}
 std::string LinearLiteral::str() const {
     std::string ret = sum_.str();
     switch (op_) {

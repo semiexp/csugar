@@ -19,6 +19,7 @@ public:
     void AddBoolVar(std::shared_ptr<BoolVar> var);
     void AddIntVar(std::shared_ptr<IntVar> var);
 
+    void SetClauses(std::vector<Clause>&& clauses) { clauses_ = clauses; }
     int NumClauses() const { return clauses_.size(); }
     Clause& GetClause(int i) { return clauses_[i]; }
     const Clause& GetClause(int i) const { return clauses_[i]; }
