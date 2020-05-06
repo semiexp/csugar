@@ -18,6 +18,9 @@ public:
     void RegisterMappingBool(std::shared_ptr<const BoolVar> var);
     void RegisterMappingInt(std::shared_ptr<const IntVar> var);
 
+    bool Retrieve(std::shared_ptr<const BoolVar> var, const std::vector<bool> &assignment);
+    int Retrieve(std::shared_ptr<const IntVar> var, const std::vector<bool> &assignment);
+
     SATLit GetCode(std::shared_ptr<const BoolVar> var) { return mapping_bool_[var]; }
     SATLit GetCodeLE(std::shared_ptr<const IntVar> var, int c);
 private:

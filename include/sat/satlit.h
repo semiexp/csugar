@@ -2,6 +2,7 @@
 
 namespace csugar {
 
+// variable ids are 0-based
 class SATLit {
 public:
     constexpr SATLit(int v, bool negative = false) : v_(v), negative_(negative) {}
