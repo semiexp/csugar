@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 
+#include "csp/csp.h"
 #include "icsp/clause.h"
 #include "common/var.h"
 #include "common/domain.h"
@@ -13,6 +14,8 @@ namespace csugar {
 class ICSP {
 public:
     ICSP() : auxiliary_id_(0) {}
+
+    void LoadVars(const CSP& csp);
 
     void AddClause(const Clause& clause) { clauses_.push_back(clause); }
     void AddClause(Clause&& clause) { clauses_.push_back(clause); }

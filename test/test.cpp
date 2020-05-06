@@ -5,5 +5,6 @@
 int main()
 {
 	RunConvertTests();
+	RunIntegratedSolvingTests();
 	return 0;
 }

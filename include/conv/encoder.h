@@ -70,7 +70,7 @@ private:
         if (a >= 0) {
             return a / b;
         } else {
-            return (a + b + 1) / a;
+            return (a + b + 1) / b;
         }
     }
     ICSP &icsp_;

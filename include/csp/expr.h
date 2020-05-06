@@ -41,6 +41,7 @@ class Expr {
 public:
     Expr(ExprType type) : type_(type) {}
     Expr(ExprType type, std::shared_ptr<Expr> expr) : type_(type), children_{expr} {}
+    Expr(ExprType type, const std::vector<std::shared_ptr<Expr>>& exprs) : type_(type), children_(exprs) {}
     Expr(ExprType type, std::initializer_list<std::shared_ptr<Expr>> il) : type_(type), children_(il) {}
 
     ExprType type() const { return type_; }
@@ -82,6 +83,11 @@ public:
     static std::shared_ptr<Expr> ConstInt(int i) {
         auto ret = Expr::Make(kConstantInt);
         ret->constant_int_ = i;
+        return ret;
+    }
+    static std::shared_ptr<Expr> ConstBool(bool b) {
+        auto ret = Expr::Make(kConstantBool);
+        ret->constant_bool_ = b;
         return ret;
     }
     static std::shared_ptr<Expr> VarBool(const std::string &name) {

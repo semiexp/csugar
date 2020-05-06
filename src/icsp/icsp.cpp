@@ -2,11 +2,20 @@
 
 #include <string>
 
+#include "csp/csp.h"
 #include "common/var.h"
 #include "common/domain.h"
 
 namespace csugar {
 
+void ICSP::LoadVars(const CSP& csp) {
+    for (auto p : csp.BoolVars()) {
+        AddBoolVar(p.second);
+    }
+    for (auto p : csp.IntVars()) {
+        AddIntVar(p.second);
+    }
+}
 void ICSP::AddBoolVar(std::shared_ptr<BoolVar> var) {
     if (bool_var_map_.count(var->name()) > 0) {
         // TODO: error
