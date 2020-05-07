@@ -173,6 +173,26 @@ LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
             }
             return ret;
         }
+    } else if (expr->type() == kMul) {
+        // TODO: proper error handling
+        if (expr->size() != 2) {
+            // not supported
+            abort();
+        }
+        LinearSum lhs = ConvertFormula((*expr)[0]);
+        LinearSum rhs = ConvertFormula((*expr)[1]);
+        LinearSum ret;
+        if (rhs.size() == 0) {
+            ret = lhs;
+            ret *= rhs.GetB();
+        } else if (lhs.size() == 0) {
+            ret = rhs;
+            ret *= lhs.GetB();
+        } else {
+            // not supported
+            abort();
+        }
+        return ret;
     } else if (expr->type() == kIf) {
         auto x1 = (*expr)[0], x2 = (*expr)[1], x3 = (*expr)[2];
         LinearSum s2 = ConvertFormula(x2), s3 = ConvertFormula(x3);
@@ -184,7 +204,7 @@ LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
         ConvertConstraint(eq);
         AddEquivalence(v, expr);
         return LinearSum(v);
-    } else if (expr->type() == kMul || expr->type() == kDiv || expr->type() == kMod
+    } else if (expr->type() == kDiv || expr->type() == kMod
             || expr->type() == kPow || expr->type() == kMin || expr->type() == kMax) {
         // TODO: not implemented yet
     } else {
