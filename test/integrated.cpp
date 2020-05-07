@@ -202,6 +202,21 @@ void RunIntegratedSolvingTest1() {
 
         TestCSPInstance(csp, false);
     }
+    {
+        CSP csp;
+        csp.AddBoolVar("x");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 20), "a");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 20), "b");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 20), "c");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 20), "d");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 20), "e");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 20), "f");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 20), "g");
+        csp.AddExpr(StringToExpr("(>= (+ a b c d e f g) (if x 135 0))", csp));
+        csp.AddExpr(StringToExpr("(>= (+ a b c d e f g) (if x 0 135))", csp));
+
+        TestCSPInstance(csp, true);
+    }
 }
 
 }
