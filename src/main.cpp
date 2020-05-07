@@ -49,7 +49,7 @@ CSP InputCSP() {
     std::string line;
 
     while (std::getline(std::cin, line)) {
-        if (IsComment(line)) {
+        if (line.size() == 0 || IsComment(line)) {
             continue;
         } else if (IsBoolDefinition(line)) {
             auto toks = SplitDepthOneExpr(line);
@@ -90,7 +90,7 @@ int main() {
     simp.Simplify();
 
     if (icsp.IsUnsatisfiable()) {
-        std::cout << "unsat" << std::endl;
+        std::cout << "s UNSATISFIABLE" << std::endl;
         return 0;
     }
 
