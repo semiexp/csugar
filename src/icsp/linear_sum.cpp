@@ -20,10 +20,12 @@ int gcd(int a, int b)
 
 namespace csugar {
 
-std::unique_ptr<Domain> LinearSum::GetDomain() {
+std::unique_ptr<Domain> LinearSum::GetDomainExcept(std::shared_ptr<IntVar> except) const {
     std::unique_ptr<Domain> ret = std::make_unique<IntervalDomain>(b_);
     for (auto& it : coef_) {
-        ret = ret->Add(it.first->domain()->Mul(it.second));
+        if (it.first != except) {
+            ret = ret->Add(it.first->domain()->Mul(it.second));
+        }
     }
     return ret;
 }

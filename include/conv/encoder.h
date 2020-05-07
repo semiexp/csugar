@@ -11,6 +11,7 @@
 #include "sat/satlit.h"
 #include "sat/mapping.h"
 #include "common/var.h"
+#include "common/util.h"
 
 namespace csugar {
 
@@ -31,9 +32,9 @@ private:
             if (b >= 0) return sat_.True();
             else return sat_.False();
         } else if (a > 0) {
-            return GetCodeLE(var, DivFloor(b, a));
+            return GetCodeLE(var, FloorDiv(b, a));
         } else {
-            return !GetCodeLE(var, DivCeil(b, a) - 1);
+            return !GetCodeLE(var, CeilDiv(b, a) - 1);
         }
     }
     SATLit GetCode(std::shared_ptr<const Literal> literal);
@@ -57,22 +58,6 @@ private:
                         int idx,
                         int b,
                         std::vector<SATLit>& clause);
-    static int DivFloor(int a, int b) {
-        assert(b > 0);
-        if (a >= 0) {
-            return a / b;
-        } else {
-            return (a - b + 1) / b;
-        }
-    }
-    static int DivCeil(int a, int b) {
-        assert(b < 0);
-        if (a >= 0) {
-            return a / b;
-        } else {
-            return (a + b + 1) / b;
-        }
-    }
     ICSP &icsp_;
     SAT &sat_;
     Mapping &mapping_;

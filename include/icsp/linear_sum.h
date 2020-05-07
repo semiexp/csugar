@@ -17,7 +17,8 @@ public:
     }
 
     int size() const { return coef_.size(); }
-    std::unique_ptr<Domain> GetDomain();
+    std::unique_ptr<Domain> GetDomain() const { return GetDomainExcept(std::shared_ptr<IntVar>(nullptr)); }
+    std::unique_ptr<Domain> GetDomainExcept(std::shared_ptr<IntVar> except) const;
     void Factorize();
     bool IsSimple() const { return coef_.size() <= 1; }
 

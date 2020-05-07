@@ -7,6 +7,7 @@
 #include "icsp/bool_literal.h"
 #include "icsp/linear_literal.h"
 #include "icsp/linear_sum.h"
+#include "common/util.h"
 
 namespace csugar {
 
@@ -193,7 +194,7 @@ void Encoder::EncodeLinearLe(const std::vector<int>& as,
 
         assert(a != 0);
         if (a > 0) {
-            ub = std::min(ub, DivFloor(-lb0, a));
+            ub = std::min(ub, FloorDiv(-lb0, a));
             // TODO: efficient impl
             for (int c : domain->Enumerate()) {
                 if (!(lb <= c && c <= ub)) continue;
@@ -207,7 +208,7 @@ void Encoder::EncodeLinearLe(const std::vector<int>& as,
                 EncodeLinearLe(as, vars, idx + 1, b + a * (ub + 1), clause);
             }
         } else {
-            lb = std::max(lb, DivCeil(-lb0, a));
+            lb = std::max(lb, CeilDiv(-lb0, a));
             clause[idx] = !GetCodeLE(vars[idx], lb - 1);
             if (clause[idx] != sat_.True()) {
                 EncodeLinearLe(as, vars, idx + 1, b + a * (lb - 1), clause);

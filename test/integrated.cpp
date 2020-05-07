@@ -113,8 +113,13 @@ void TestCSPInstance(CSP& csp, bool expected_sat) {
         conv.Convert(expr);
     }
 
+    icsp.Propagate();
+
     Simplifier simp(icsp);
     simp.Simplify();
+
+    if (expected_sat) assert(!icsp.IsUnsatisfiable());
+    else if (icsp.IsUnsatisfiable()) return;
 
     SAT sat;
     Mapping mapping(sat);
@@ -172,6 +177,28 @@ void RunIntegratedSolvingTest1() {
         csp.AddIntVar(std::make_unique<IntervalDomain>(0, 3), "d");
         csp.AddIntVar(std::make_unique<IntervalDomain>(0, 3), "e");
         csp.AddExpr(StringToExpr("(and (< a b) (< b c) (< c d) (< d e))", csp));
+
+        TestCSPInstance(csp, false);
+    }
+    {
+        CSP csp;
+        csp.AddBoolVar("x");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 10), "a");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 10), "b");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 10), "c");
+        csp.AddExpr(StringToExpr("(== a (+ b b (if x 1 0)))", csp));
+        csp.AddExpr(StringToExpr("(== a (+ c c (if x 1 0)))", csp));
+
+        TestCSPInstance(csp, true);
+    }
+    {
+        CSP csp;
+        csp.AddBoolVar("x");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 10), "a");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 10), "b");
+        csp.AddIntVar(std::make_unique<IntervalDomain>(0, 10), "c");
+        csp.AddExpr(StringToExpr("(== a (+ b b (if x 1 0)))", csp));
+        csp.AddExpr(StringToExpr("(== a (+ c c (if x 0 1)))", csp));
 
         TestCSPInstance(csp, false);
     }

@@ -13,7 +13,7 @@ namespace csugar {
 
 class ICSP {
 public:
-    ICSP() : auxiliary_id_(0) {}
+    ICSP() : auxiliary_id_(0), unsatisfiable_(false) {}
 
     void LoadVars(const CSP& csp);
 
@@ -42,6 +42,9 @@ public:
     std::shared_ptr<BoolVar> AuxiliaryBoolVar();
     std::shared_ptr<IntVar> AuxiliaryIntVar(std::unique_ptr<Domain>&& domain);
 
+    void Propagate();
+    bool IsUnsatisfiable() const { return unsatisfiable_; }
+
 private:
     std::string AuxiliaryVarName() const;
 
@@ -51,6 +54,7 @@ private:
     std::map<std::string, std::shared_ptr<BoolVar>> bool_var_map_;
     std::map<std::string, std::shared_ptr<IntVar>> int_var_map_;
     int auxiliary_id_;
+    bool unsatisfiable_;
 };
 
 }

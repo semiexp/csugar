@@ -38,5 +38,13 @@ std::unique_ptr<Domain> IntervalDomain::Mul(int other) const {
 std::unique_ptr<Domain> IntervalDomain::Cup(const std::unique_ptr<Domain>& other) const {
     return std::make_unique<IntervalDomain>(IntervalDomain(std::min(lb_, other->GetLowerBound()), std::max(ub_, other->GetUpperBound())));
 }
+DomainBoundingResult IntervalDomain::Bound(int lb, int ub) {
+    bool updated = (lb_ < lb) || (ub < ub_);
+    lb_ = std::max(lb_, lb);
+    ub_ = std::min(ub_, ub);
+
+    if (lb_ > ub_) return kEmptyDomain;
+    return updated ? kUpdate : kNoUpdate;
+}
 
 }

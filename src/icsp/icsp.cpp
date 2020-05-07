@@ -54,4 +54,23 @@ std::shared_ptr<IntVar> ICSP::AuxiliaryIntVar(std::unique_ptr<Domain>&& domain) 
     AddIntVar(v);
     return v;
 }
+void ICSP::Propagate() {
+    bool updated;
+    do {
+        updated = false;
+
+        for (auto& clause : clauses_) {
+            DomainBoundingResult prop = clause.Propagate();
+            if (prop == kEmptyDomain) {
+                unsatisfiable_ = true;
+                return;
+            } else if (prop == kUpdate) {
+                updated = true;
+            }
+            if (clause.RemoveFalsefood()) updated = true;
+        }
+
+        if (!updated) break;
+    } while (updated);
+}
 }

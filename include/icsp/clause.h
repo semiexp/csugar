@@ -3,7 +3,10 @@
 #include <vector>
 #include <memory>
 #include <string>
+#include <set>
 
+#include "common/var.h"
+#include "common/domain.h"
 #include "icsp/literal.h"
 
 namespace csugar {
@@ -23,6 +26,11 @@ public:
     bool IsSimple() const;
 
     std::string str() const;
+
+    std::set<std::shared_ptr<IntVar>> GetCommonIntVars() const;
+    bool IsValid() const;
+    DomainBoundingResult Propagate();
+    bool RemoveFalsefood();
 
 private:
     std::vector<std::shared_ptr<Literal>> literals_;

@@ -20,11 +20,15 @@ public:
     const LinearSum& sum() const { return sum_; }
     LinearSum& sum() { return sum_; }
     LinearLiteralOp op() const { return op_; }
+    bool IsUnsatisfiable() const override;
 
     bool IsValid() const override { /* TODO */ return false; }
     bool IsSimple() const override;
 
     std::string str() const override;
+
+    std::set<std::shared_ptr<IntVar>> IntVars() const;
+    std::pair<int, int> GetBound(std::shared_ptr<IntVar> v) const;
 
 private:
     LinearSum sum_;

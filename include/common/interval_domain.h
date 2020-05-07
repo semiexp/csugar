@@ -20,6 +20,8 @@ public:
     std::unique_ptr<Domain> Sub(const std::unique_ptr<Domain>& other) const override;
     std::unique_ptr<Domain> Mul(int other) const override;
     std::unique_ptr<Domain> Cup(const std::unique_ptr<Domain>& other) const override;
+    DomainBoundingResult Bound(int lb, int ub) override;
+
 private:
     int lb_, ub_;
 };

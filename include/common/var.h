@@ -25,6 +25,7 @@ public:
     std::unique_ptr<Domain>& domain() { return domain_; }
     const std::unique_ptr<Domain>& domain() const { return domain_; }
     std::string name() const { return name_; }
+    DomainBoundingResult Bound(int lb, int ub) { return domain_->Bound(lb, ub); }
 
 private:
     std::unique_ptr<Domain> domain_;
