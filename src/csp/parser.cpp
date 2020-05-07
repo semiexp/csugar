@@ -43,10 +43,7 @@ const std::map<std::string, ExprType> kTokenToExprType = {
 std::string NextToken(const std::string& s, int& p) {
     std::string ret;
     while (true) {
-        if (p >= s.size()) {
-            throw ParseError("unexpected end of line");
-        }
-        if (s[p] == ' ' || s[p] == ')') {
+        if (p >= s.size() || s[p] == ' ' || s[p] == ')') {
             break;
         }
         ret.push_back(s[p++]);
