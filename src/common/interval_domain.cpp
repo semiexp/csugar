@@ -15,6 +15,10 @@ int IntervalDomain::GetLowerBound() const {
 int IntervalDomain::GetUpperBound() const {
     return ub_;
 }
+int IntervalDomain::size() const {
+    if (lb_ > ub_) return 0;
+    return ub_ - lb_ + 1;
+}
 std::vector<int> IntervalDomain::Enumerate() const {
     std::vector<int> ret;
     for (int i = lb_; i <= ub_; ++i) {

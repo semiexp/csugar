@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 
+#include "csp/expr.h"
 #include "common/var.h"
 #include "common/domain.h"
 
@@ -20,6 +21,8 @@ public:
     std::unique_ptr<Domain> GetDomain() const { return GetDomainExcept(std::shared_ptr<IntVar>(nullptr)); }
     std::unique_ptr<Domain> GetDomainExcept(std::shared_ptr<IntVar> except) const;
     void Factorize();
+    std::vector<std::shared_ptr<IntVar>> GetVariablesSorted() const;
+    std::vector<LinearSum> Split(int s) const;
     bool IsSimple() const { return coef_.size() <= 1; }
 
     const std::map<std::shared_ptr<IntVar>, int>& GetCoef() const { return coef_; }
@@ -35,8 +38,12 @@ public:
         return *this;
     }
     LinearSum& operator*=(int rhs);
+    int Factor() const;
+    void Divide(int v);
 
     std::string str() const;
+
+    std::shared_ptr<Expr> ToExpr() const;
 
 private:
     void WeightedAdd(const LinearSum& other, int w);

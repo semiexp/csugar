@@ -14,6 +14,7 @@ public:
 
     int GetLowerBound() const override;
     int GetUpperBound() const override;
+    int size() const override;
     std::vector<int> Enumerate() const override;
 
     std::unique_ptr<Domain> Add(const std::unique_ptr<Domain>& other) const override;

@@ -1,4 +1,7 @@
 #include "conv/converter.h"
+
+#include <memory>
+
 #include "common/var.h"
 #include "icsp/bool_literal.h"
 #include "icsp/linear_sum.h"
@@ -132,7 +135,12 @@ std::vector<Clause> Converter::ConvertComparison(std::shared_ptr<Expr> x, std::s
     std::shared_ptr<Literal> lit = std::make_shared<LinearLiteral>(e, op);
     std::vector<Clause> ret;
     // TODO: check isValid / isUnsatisfiable
-    ret.push_back(lit);
+    if (lit->IsValid()) {
+    } else if (lit->IsUnsatisfiable()) {
+        ret.push_back(Clause());
+    } else {
+        ret.push_back(lit);
+    }
     return ret;
 }
 LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
@@ -184,8 +192,45 @@ LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
     }
 }
 LinearSum Converter::ReduceArity(const LinearSum &e, LinearLiteralOp op) {
-    // TODO
-    return e;
+    // TODO: this condition should depend on the domain size as well
+    if (e.size() <= 3) {
+        return e;
+    }
+    return SimplifyLinearExpression(e, op, true);
+}
+LinearSum Converter::SimplifyLinearExpression(const LinearSum& e, LinearLiteralOp op, bool first) {
+    // TODO: this condition should depend on the domain size as well
+    if (e.size() <= 1) return e;
+
+    int b = e.GetB();
+    auto es = e.Split(first ? 3 : 2); // TODO: parameterize
+    LinearSum ret(b);
+
+    for (int i = 0; i < es.size(); ++i) {
+        LinearSum ei = es[i];
+        int factor = ei.Factor();
+        if (factor > 1) {
+            ei.Divide(factor);
+        }
+        ei = SimplifyLinearExpression(ei, kLitEq, false);
+        if (ei.size() > 1) {
+            auto v = icsp_.AuxiliaryIntVar(ei.GetDomain());
+            auto ei_expr = ei.ToExpr();
+            
+            ExprType type;
+            if (op == kLitGe) type = kLe;
+            else if (op == kLitLe) type = kGe;
+            else type = kEq;
+
+            ConvertConstraint(Expr::Make(type, { Expr::VarInt(v->name()), ei_expr }));
+            ei = LinearSum(v);
+        }
+        if (factor > 1) {
+            ei *= factor;
+        }
+        ret += ei;
+    }
+    return ret;
 }
 
 }

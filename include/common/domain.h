@@ -16,6 +16,7 @@ public:
 
     virtual int GetLowerBound() const = 0;
     virtual int GetUpperBound() const = 0;
+    virtual int size() const = 0;
     virtual std::vector<int> Enumerate() const = 0;
 
     virtual std::unique_ptr<Domain> Add(const std::unique_ptr<Domain>& other) const = 0;

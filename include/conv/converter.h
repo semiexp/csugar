@@ -27,6 +27,7 @@ private:
     std::vector<Clause> ConvertComparison(std::shared_ptr<Expr> x, std::shared_ptr<Expr> y, LinearLiteralOp op);
     LinearSum ConvertFormula(std::shared_ptr<Expr> expr);
     LinearSum ReduceArity(const LinearSum &e, LinearLiteralOp op);
+    LinearSum SimplifyLinearExpression(const LinearSum& e, LinearLiteralOp op, bool first);
 
     std::shared_ptr<IntVar> GetEquivalence(std::shared_ptr<Expr> x) {
         // TODO

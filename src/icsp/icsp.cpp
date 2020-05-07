@@ -1,6 +1,7 @@
 #include "icsp/icsp.h"
 
 #include <string>
+#include <algorithm>
 
 #include "csp/csp.h"
 #include "common/var.h"
@@ -72,5 +73,7 @@ void ICSP::Propagate() {
 
         if (!updated) break;
     } while (updated);
+
+    std::remove_if(clauses_.begin(), clauses_.end(), [](Clause& clause) { return clause.IsValid(); });
 }
 }
