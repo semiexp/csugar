@@ -217,6 +217,18 @@ void RunIntegratedSolvingTest1() {
 
         TestCSPInstance(csp, true);
     }
+    {
+        CSP csp;
+        csp.AddBoolVar("a");
+        csp.AddBoolVar("b");
+        csp.AddBoolVar("c");
+        csp.AddBoolVar("d");
+        csp.AddBoolVar("e");
+        csp.AddBoolVar("f");
+        csp.AddExpr(StringToExpr("(= (+ (if a 1 0) (if b 1 0) (if c 1 0) (if d 1 0) (if e 1 0) (if f 1 0)) 3)", csp));
+
+        TestCSPInstance(csp, true);
+    }
 }
 
 }
