@@ -12,6 +12,7 @@ namespace {
 
 const std::map<std::string, ExprType> kTokenToExprType = {
     {"not", kNot},
+    {"!", kNot},
     {"and", kAnd},
     {"&&", kAnd},
     {"or", kOr},
