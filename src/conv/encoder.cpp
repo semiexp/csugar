@@ -129,10 +129,10 @@ void Encoder::EncodeLinearLeLiteral(std::shared_ptr<LinearLiteral> literal, cons
         int n = sum.size();
         std::vector<int> as;
         std::vector<std::shared_ptr<IntVar>> vars;
-        // TODO: sort by domain size
-        for (auto p : sum.GetCoef()) {
-            vars.push_back(p.first);
-            as.push_back(p.second);
+
+        for (auto v : sum.GetVariablesSorted()) {
+            vars.push_back(v);
+            as.push_back(sum.GetCoef()[v]);
         }
 
         std::vector<SATLit> clause2(n, sat_.False());
@@ -146,10 +146,10 @@ void Encoder::EncodeLinearNeLiteral(std::shared_ptr<LinearLiteral> literal, cons
     int n = sum.size();
     std::vector<int> as;
     std::vector<std::shared_ptr<IntVar>> vars;
-    // TODO: sort by domain size
-    for (auto p : sum.GetCoef()) {
-        vars.push_back(p.first);
-        as.push_back(p.second);
+
+    for (auto v : sum.GetVariablesSorted()) {
+        vars.push_back(v);
+        as.push_back(sum.GetCoef()[v]);
     }
 
     std::vector<SATLit> clause2(n * 2, sat_.False());
