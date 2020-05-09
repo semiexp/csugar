@@ -59,11 +59,11 @@ std::unique_ptr<Domain> EnumerativeDomain::Cup(const std::unique_ptr<Domain>& ot
 }
 DomainBoundingResult EnumerativeDomain::Bound(int lb, int ub) {
     bool removed = false;
-    for (auto it = domain_.begin(); it != domain_.end(); ++it) {
+    for (auto it = domain_.begin(); it != domain_.end(); ) {
         if (!(lb <= *it && *it <= ub)) {
             removed = true;
-            domain_.erase(it);
-        }
+            it = domain_.erase(it);
+        } else ++it;
     }
     if (domain_.size() == 0) return kEmptyDomain;
     return removed ? kUpdate : kNoUpdate;

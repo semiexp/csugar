@@ -27,8 +27,9 @@ std::set<std::shared_ptr<IntVar>> Clause::GetCommonIntVars() const {
     std::set<std::shared_ptr<IntVar>> ret = literals_[0]->IntVars();
     for (int i = 1; i < size(); ++i) {
         auto tmp = literals_[i]->IntVars();
-        for (auto it = ret.begin(); it != ret.end(); ++it) {
-            if (tmp.count(*it) == 0) ret.erase(it);
+        for (auto it = ret.begin(); it != ret.end(); ) {
+            if (tmp.count(*it) == 0) it = ret.erase(it);
+            else ++it;
         }
     }
     return ret;
