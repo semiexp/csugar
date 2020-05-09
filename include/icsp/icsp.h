@@ -13,7 +13,7 @@ namespace csugar {
 
 class ICSP {
 public:
-    ICSP() : auxiliary_id_(0), unsatisfiable_(false) {}
+    ICSP() : auxiliary_id_(0), unsatisfiable_(false), encoded_clauses_(0), encoded_bool_vars_(0), encoded_int_vars_(0) {}
 
     void LoadVars(const CSP& csp);
 
@@ -26,6 +26,15 @@ public:
     int NumClauses() const { return clauses_.size(); }
     Clause& GetClause(int i) { return clauses_[i]; }
     const Clause& GetClause(int i) const { return clauses_[i]; }
+
+    int NumEncodedClauses() const { return encoded_clauses_; }
+    int NumEncodedBoolVars() const { return encoded_bool_vars_; }
+    int NumEncodedIntVars() const { return encoded_int_vars_; }
+    void SetAllEncoded() {
+        encoded_clauses_ = clauses_.size();
+        encoded_bool_vars_ = bool_vars_.size();
+        encoded_int_vars_ = int_vars_.size();
+    }
 
     int NumBoolVars() const { return bool_vars_.size(); }
     bool HasBoolVar(const std::string& name);
@@ -54,6 +63,7 @@ private:
     std::map<std::string, std::shared_ptr<BoolVar>> bool_var_map_;
     std::map<std::string, std::shared_ptr<IntVar>> int_var_map_;
     int auxiliary_id_;
+    int encoded_clauses_, encoded_bool_vars_, encoded_int_vars_;
     bool unsatisfiable_;
 };
 

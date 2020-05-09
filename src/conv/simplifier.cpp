@@ -7,11 +7,15 @@
 
 namespace csugar {
 
-void Simplifier::Simplify() {
+void Simplifier::Simplify(bool incremental) {
     std::vector<Clause> new_clauses;
     for (int i = 0; i < icsp_.NumClauses(); ++i) {
-        auto new_clauses_part = Simplify(icsp_.GetClause(i));
-        new_clauses.insert(new_clauses.end(), new_clauses_part.begin(), new_clauses_part.end());
+        if (incremental && i < icsp_.NumEncodedClauses()) {
+            new_clauses.push_back(icsp_.GetClause(i));
+        } else {
+            auto new_clauses_part = Simplify(icsp_.GetClause(i));
+            new_clauses.insert(new_clauses.end(), new_clauses_part.begin(), new_clauses_part.end());
+        }
     }
     icsp_.SetClauses(std::move(new_clauses));
 }

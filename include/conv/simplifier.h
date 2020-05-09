@@ -11,7 +11,7 @@ class Simplifier {
 public:
     Simplifier(ICSP& icsp) : icsp_(icsp) {}
 
-    void Simplify();
+    void Simplify(bool incremental = false);
 
 private:
     std::vector<Clause> Simplify(Clause &clause);

@@ -19,7 +19,7 @@ class Encoder {
 public:
     Encoder(ICSP& icsp, SAT& sat, Mapping& mapping) : icsp_(icsp), sat_(sat), mapping_(mapping) {}
 
-    void Encode();
+    void Encode(bool incremental = false);
     void EncodeBoolVar(std::shared_ptr<const BoolVar> var);
     void EncodeIntVar(std::shared_ptr<const IntVar> var);
     void EncodeClause(const Clause& clause);
@@ -38,9 +38,7 @@ private:
         }
     }
     SATLit GetCode(std::shared_ptr<const Literal> literal);
-    void AddSATClause(const std::vector<SATLit>& clause) {
-        sat_.clauses.push_back(clause);
-    }
+    void AddSATClause(const std::vector<SATLit>& clause) { sat_.AddClause(clause); }
     void EncodeLiteral(std::shared_ptr<Literal> literal, const std::vector<SATLit>& clause);
     void EncodeLinearLeLiteral(std::shared_ptr<LinearLiteral> literal, const std::vector<SATLit>& clause);
     void EncodeLinearNeLiteral(std::shared_ptr<LinearLiteral> literal, const std::vector<SATLit>& clause);

@@ -18,6 +18,7 @@ public:
     void Convert(std::shared_ptr<Expr> expr) {
         ConvertConstraint(expr);
     }
+    void Convert(CSP& csp, bool incremental = false);
     Config GetConfig() const { return config_; }
     void SetCofig(const Config& config) { config_ = config; }
 

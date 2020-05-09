@@ -8,20 +8,21 @@ void Mapping::RegisterMappingBool(std::shared_ptr<const BoolVar> var) {
     if (mapping_bool_.count(var) > 0) {
         // TODO: error
     }
-    int id = sat_.n_variables++;
+    int id = sat_.NumVariables();
+    sat_.AddVariables(1);
     mapping_bool_.insert({var, id});
 }
 void Mapping::RegisterMappingInt(std::shared_ptr<const IntVar> var) {
     if (mapping_int_.count(var) > 0) {
         // TODO: error
     }
-    int id = sat_.n_variables;
+    int id = sat_.NumVariables();
     std::vector<int> domain = var->domain()->Enumerate();
     if (domain.size() == 0) {
         // TODO: error
     }
     mapping_int_.insert({var, {domain, id }});
-    sat_.n_variables += (int)domain.size() - 1;
+    sat_.AddVariables((int)domain.size() - 1);
 }
 bool Mapping::Retrieve(std::shared_ptr<const BoolVar> var, const std::vector<bool> &assignment) {
     int id = mapping_bool_.at(var);

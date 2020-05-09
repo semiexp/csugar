@@ -8,13 +8,16 @@
 
 namespace csugar { 
 
-std::vector<bool> Solver::Solve() {
+std::vector<bool> Solver::Solve(bool incremental) {
     // TODO: incremental solver
-    Minisat::Solver solver;
-    for (int i = 0; i < sat_.n_variables; ++i) {
-        solver.newVar();
+    if (!actual_solver_ || !incremental) {
+        actual_solver_ = std::move(std::make_unique<Minisat::Solver>());
     }
-    for (auto& clause : sat_.clauses) {
+    for (int i = incremental ? sat_.NumSolvedVariables() : 0; i < sat_.NumVariables(); ++i) {
+        actual_solver_->newVar();
+    }
+    for (int i = incremental ? sat_.NumSolvedClauses() : 0; i < sat_.NumClauses(); ++i) {
+        const std::vector<SATLit>& clause = sat_.GetClause(i);
         bool is_true = false;
         for (SATLit lit : clause) {
             if (lit == SAT::True()) is_true = true;
@@ -26,22 +29,23 @@ std::vector<bool> Solver::Solve() {
                 c.push(Minisat::mkLit(lit.GetVariable(), lit.IsNegative()));
             }
         }
-        solver.addClause_(c);
+        actual_solver_->addClause_(c);
     }
+    sat_.SetAllSolved();
 
-    if (!solver.simplify()) {
+    if (!actual_solver_->simplify()) {
         return std::vector<bool>();
     }
 
-    bool is_sat = solver.solve();
+    bool is_sat = actual_solver_->solve();
     if (!is_sat) {
         return std::vector<bool>();
     }
 
-    std::vector<bool> ret(sat_.n_variables);
+    std::vector<bool> ret(sat_.NumVariables());
     Minisat::lbool ltrue((uint8_t)0);
-    for (int i = 0; i < sat_.n_variables; ++i) {
-        ret[i] = (solver.model[i] == ltrue);
+    for (int i = 0; i < sat_.NumVariables(); ++i) {
+        ret[i] = (actual_solver_->model[i] == ltrue);
     }
 
     return ret;

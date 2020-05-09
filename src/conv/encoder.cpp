@@ -11,17 +11,17 @@
 
 namespace csugar {
 
-void Encoder::Encode() {
-    // TODO: support incremental CSP
-    for (int i = 0; i < icsp_.NumBoolVars(); ++i) {
+void Encoder::Encode(bool incremental) {
+    for (int i = incremental ? icsp_.NumEncodedBoolVars() : 0; i < icsp_.NumBoolVars(); ++i) {
         EncodeBoolVar(icsp_.GetBoolVar(i));
     }
-    for (int i = 0; i < icsp_.NumIntVars(); ++i) {
+    for (int i = incremental ? icsp_.NumEncodedIntVars() : 0; i < icsp_.NumIntVars(); ++i) {
         EncodeIntVar(icsp_.GetIntVar(i));
     }
-    for (int i = 0; i < icsp_.NumClauses(); ++i) {
+    for (int i = incremental ? icsp_.NumEncodedClauses() : 0; i < icsp_.NumClauses(); ++i) {
         EncodeClause(icsp_.GetClause(i));
     }
+    icsp_.SetAllEncoded();
 }
 void Encoder::EncodeBoolVar(std::shared_ptr<const BoolVar> var) {
     mapping_.RegisterMappingBool(var);
@@ -31,7 +31,7 @@ void Encoder::EncodeIntVar(std::shared_ptr<const IntVar> var) {
 
     std::vector<int> domain = var->domain()->Enumerate();
     for (int i = 1; i < domain.size(); ++i) {
-        sat_.clauses.push_back({
+        AddSATClause({
             !GetCodeLE(var, domain[i - 1]),
             GetCodeLE(var, domain[i])
         });
@@ -58,7 +58,7 @@ void Encoder::EncodeClause(const Clause& clause) {
     }
 
     if (complex_index == -1) {
-        sat_.clauses.push_back(sat_clause);
+        AddSATClause(sat_clause);
     } else {
         EncodeLiteral(clause[complex_index], sat_clause);
     }
@@ -100,7 +100,7 @@ void Encoder::EncodeLiteral(std::shared_ptr<Literal> literal, const std::vector<
         if (bool_literal->negative()) code = !code;
         std::vector<SATLit> clause2 = clause;
         clause2.push_back(code);
-        sat_.clauses.push_back(clause2);
+        AddSATClause(clause2);
     } else if (std::shared_ptr<LinearLiteral> linear_literal = std::dynamic_pointer_cast<LinearLiteral>(literal)) {
         switch (linear_literal->op()) {
         case kLitLe:

@@ -13,10 +13,16 @@ namespace csugar {
 
 class CSP {
 public:
-    CSP() {}
+    CSP() : converted_exprs_(0) {}
 
     const std::vector<std::shared_ptr<Expr>>& Exprs() const {
         return exprs_;
+    }
+    int NumConvertedExprs() const {
+        return converted_exprs_;
+    }
+    void SetAllExprsConverted() {
+        converted_exprs_ = exprs_.size();
     }
     const std::map<std::string, std::shared_ptr<BoolVar>>& BoolVars() const {
         return bool_vars_;
@@ -60,6 +66,7 @@ private:
     std::vector<std::shared_ptr<Expr>> exprs_;
     std::map<std::string, std::shared_ptr<BoolVar>> bool_vars_;
     std::map<std::string, std::shared_ptr<IntVar>> int_vars_;
+    int converted_exprs_;
 };
 
 }

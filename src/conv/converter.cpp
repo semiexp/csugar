@@ -9,6 +9,13 @@
 
 namespace csugar {
 
+void Converter::Convert(CSP& csp, bool incremental) {
+    auto& exprs = csp.Exprs();
+    int start_index = incremental ? csp.NumConvertedExprs() : 0;
+    for (int i = start_index; i < exprs.size(); ++i) {
+        Convert(exprs[i]);
+    }
+}
 void Converter::ConvertConstraint(std::shared_ptr<Expr> expr) {
     std::vector<Clause> clauses = ConvertConstraint(expr, false);
     for (auto&& c : clauses) {
