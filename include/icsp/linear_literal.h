@@ -22,7 +22,7 @@ public:
     LinearLiteralOp op() const { return op_; }
     bool IsUnsatisfiable() const override;
 
-    bool IsValid() const override { /* TODO */ return false; }
+    bool IsValid() const override;
     bool IsSimple() const override;
 
     std::string str() const override;

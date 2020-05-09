@@ -18,6 +18,16 @@ bool LinearLiteral::IsUnsatisfiable() const {
         case kLitGe: return domain->GetUpperBound() < 0;
     }
 }
+bool LinearLiteral::IsValid() const {
+    auto domain = sum_.GetDomain();
+    if (domain->GetLowerBound() > domain->GetUpperBound()) return false;
+    switch (op_) {
+        case kLitEq: return domain->GetLowerBound() == 0 && domain->GetUpperBound() == 0;
+        case kLitNe: return domain->GetLowerBound() > 0 || domain->GetUpperBound() < 0;
+        case kLitLe: return domain->GetUpperBound() <= 0;
+        case kLitGe: return domain->GetLowerBound() >= 0;
+    }
+}
 bool LinearLiteral::IsSimple() const {
     // TODO: log encoding?
     if (op_ == kLitGe || op_  == kLitLe) {

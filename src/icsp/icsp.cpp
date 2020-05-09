@@ -74,6 +74,9 @@ void ICSP::Propagate() {
         if (!updated) break;
     } while (updated);
 
-    std::remove_if(clauses_.begin(), clauses_.end(), [](Clause& clause) { return clause.IsValid(); });
+    clauses_.erase(
+        std::remove_if(clauses_.begin(), clauses_.end(), [](Clause& clause) { return clause.IsValid(); }),
+        clauses_.end()
+    );
 }
 }

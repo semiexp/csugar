@@ -15,9 +15,16 @@ std::vector<bool> Solver::Solve() {
         solver.newVar();
     }
     for (auto& clause : sat_.clauses) {
+        bool is_true = false;
+        for (SATLit lit : clause) {
+            if (lit == SAT::True()) is_true = true;
+        }
+        if (is_true) continue;
         Minisat::vec<Minisat::Lit> c;
         for (SATLit lit : clause) {
-            c.push(Minisat::mkLit(lit.GetVariable(), lit.IsNegative()));
+            if (lit != SAT::False()) {
+                c.push(Minisat::mkLit(lit.GetVariable(), lit.IsNegative()));
+            }
         }
         solver.addClause_(c);
     }
