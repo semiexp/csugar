@@ -7,6 +7,7 @@
 #include "icsp/icsp.h"
 #include "icsp/linear_sum.h"
 #include "icsp/linear_literal.h"
+#include "common/config.h"
 
 namespace csugar {
 
@@ -17,6 +18,8 @@ public:
     void Convert(std::shared_ptr<Expr> expr) {
         ConvertConstraint(expr);
     }
+    Config GetConfig() const { return config_; }
+    void SetCofig(const Config& config) { config_ = config; }
 
 private:
     void ConvertConstraint(std::shared_ptr<Expr> expr);
@@ -31,13 +34,19 @@ private:
 
     std::shared_ptr<IntVar> GetEquivalence(std::shared_ptr<Expr> x) {
         // TODO
+        for (auto& p : cache_) {
+            if (Expr::Equal(x, p.first)) return p.second;
+        }
         return std::shared_ptr<IntVar>(nullptr);
     }
     void AddEquivalence(std::shared_ptr<IntVar> v, std::shared_ptr<Expr> x) {
         // TODO
+        cache_.push_back({x, v});
     }
 
     ICSP& icsp_;
+    std::vector<std::pair<std::shared_ptr<Expr>, std::shared_ptr<IntVar>>> cache_;
+    Config config_;
 };
 
 }

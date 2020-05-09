@@ -100,6 +100,7 @@ public:
         ret->name_ = name;
         return ret;
     }
+    static bool Equal(const std::shared_ptr<Expr>& lhs, const std::shared_ptr<Expr>& rhs);
 private:
     ExprType type_;
     std::vector<std::shared_ptr<Expr>> children_;

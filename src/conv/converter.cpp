@@ -13,6 +13,9 @@ void Converter::ConvertConstraint(std::shared_ptr<Expr> expr) {
     std::vector<Clause> clauses = ConvertConstraint(expr, false);
     for (auto&& c : clauses) {
         icsp_.AddClause(c);
+        if (config_.incremental_propagation) {
+            icsp_.GetClause(icsp_.NumClauses() - 1).Propagate();
+        }
     }
 }
 std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, bool negative) {
@@ -106,8 +109,18 @@ std::vector<Clause> Converter::ConvertDisj(std::shared_ptr<Expr> expr, bool nega
 }
 std::shared_ptr<Expr> Converter::ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses) {
     // TODO: NORMALIZE_LINEARSUM?
-    if (true) {
-
+    if (config_.normalize_linearsum) {
+        if (expr->type() == kEq) {
+            return Expr::And(
+                Expr::Make(kLe, { (*expr)[0], (*expr)[1] }),
+                Expr::Make(kGe, { (*expr)[0], (*expr)[1] })
+            );
+        } else if (expr->type() == kNe) {
+            return Expr::Or(
+                Expr::Make(kLt, { (*expr)[0], (*expr)[1] }),
+                Expr::Make(kGt, { (*expr)[0], (*expr)[1] })
+            );
+        }
     }
 
     std::vector<Clause> clauses_sub;
@@ -212,15 +225,15 @@ LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
     }
 }
 LinearSum Converter::ReduceArity(const LinearSum &e, LinearLiteralOp op) {
-    // TODO: this condition should depend on the domain size as well
-    if (e.size() <= 3) {
+    if (!config_.reduce_arity) return e;
+    if (e.size() <= 3 || e.GetExpectedDomainSize(true) <= config_.max_linearsum_size) {
         return e;
     }
     return SimplifyLinearExpression(e, op, true);
 }
 LinearSum Converter::SimplifyLinearExpression(const LinearSum& e, LinearLiteralOp op, bool first) {
-    // TODO: this condition should depend on the domain size as well
     if (e.size() <= 1) return e;
+    if (e.GetExpectedDomainSize(false) <= config_.max_linearsum_size) return e;
 
     int b = e.GetB();
     auto es = e.Split(first ? 3 : 2); // TODO: parameterize

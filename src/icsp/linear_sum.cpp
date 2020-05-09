@@ -31,6 +31,19 @@ std::unique_ptr<Domain> LinearSum::GetDomainExcept(std::shared_ptr<IntVar> excep
     }
     return ret;
 }
+int LinearSum::GetExpectedDomainSize(bool exclude_largest, int threshold) const {
+    int ret = 1;
+    auto vars_sorted = GetVariablesSorted();
+    for (int i = 0; i + (exclude_largest ? 1 : 0) < vars_sorted.size(); ++i) {
+       int s = vars_sorted[i]->domain()->size();
+       if (ret <= threshold / s) {
+           ret *= s;
+       } else {
+           return threshold;
+       }
+    }
+    return ret;
+}
 void LinearSum::Factorize() {
     int g = Factor();
     if (g != 0) Divide(g);
