@@ -41,6 +41,8 @@ std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, boo
         } else if (expr->type() == kVariableBool) {
             clauses.push_back(Clause(std::make_shared<BoolLiteral>(icsp_.GetBoolVar(expr->VariableName()), negative)));
             break;
+        } else if (expr->type() == kAllDifferent) {
+            expr = ConvertAllDifferent(expr);
         } else if (expr->IsLogical()) {
             if (expr->type() == kNot) {
                 expr = (*expr)[0];
@@ -113,6 +115,16 @@ std::vector<Clause> Converter::ConvertDisj(std::shared_ptr<Expr> expr, bool nega
         clauses.push_back(aux_clause);
     }
     return clauses;
+}
+std::shared_ptr<Expr> Converter::ConvertAllDifferent(std::shared_ptr<Expr> expr) {
+    std::vector<std::shared_ptr<Expr>> sub_exprs;
+    for (int i = 0; i < expr->size(); ++i) {
+        for (int j = i + 1; j < expr->size(); ++j) {
+            sub_exprs.push_back(Expr::Make(kNe, {(*expr)[i], (*expr)[j]}));
+        }
+    }
+    // TODO: optimization
+    return std::make_shared<Expr>(kAnd, sub_exprs);
 }
 std::shared_ptr<Expr> Converter::ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses) {
     // TODO: NORMALIZE_LINEARSUM?

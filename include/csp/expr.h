@@ -35,6 +35,7 @@ enum ExprType {
     kMin,
     kMax,
     kIf,
+    kAllDifferent,
 };
 
 class Expr {

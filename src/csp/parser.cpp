@@ -39,6 +39,7 @@ const std::map<std::string, ExprType> kTokenToExprType = {
     {"sub", kSub},
     {"-", kSub},
     {"if", kIf},
+    {"alldifferent", kAllDifferent},
 };
 
 std::string NextToken(const std::string& s, int& p) {
@@ -58,6 +59,9 @@ std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p) {
     if (s[p] == '(') {
         ++p;
         std::string name = NextToken(s, p);
+        if (kTokenToExprType.count(name) == 0) {
+            throw ParseError("unknown operator");
+        }
         ExprType type = kTokenToExprType.at(name);
         std::vector<std::shared_ptr<Expr>> children;
         while (true) {
