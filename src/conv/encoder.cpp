@@ -23,11 +23,12 @@ void Encoder::Encode(bool incremental) {
     }
     icsp_.SetAllEncoded();
 }
-void Encoder::EncodeBoolVar(std::shared_ptr<const BoolVar> var) {
+void Encoder::EncodeBoolVar(std::shared_ptr<BoolVar> var) {
     mapping_.RegisterMappingBool(var);
 }
-void Encoder::EncodeIntVar(std::shared_ptr<const IntVar> var) {
+void Encoder::EncodeIntVar(std::shared_ptr<IntVar> var) {
     mapping_.RegisterMappingInt(var);
+    var->SetEncoded();
 
     std::vector<int> domain = var->domain()->Enumerate();
     for (int i = 1; i < domain.size(); ++i) {

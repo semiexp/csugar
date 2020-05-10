@@ -20,8 +20,8 @@ public:
     Encoder(ICSP& icsp, SAT& sat, Mapping& mapping) : icsp_(icsp), sat_(sat), mapping_(mapping) {}
 
     void Encode(bool incremental = false);
-    void EncodeBoolVar(std::shared_ptr<const BoolVar> var);
-    void EncodeIntVar(std::shared_ptr<const IntVar> var);
+    void EncodeBoolVar(std::shared_ptr<BoolVar> var);
+    void EncodeIntVar(std::shared_ptr<IntVar> var);
     void EncodeClause(const Clause& clause);
 private:
     SATLit GetCodeLE(std::shared_ptr<const IntVar> var, int c) {

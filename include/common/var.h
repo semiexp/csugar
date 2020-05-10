@@ -20,16 +20,22 @@ private:
 
 class IntVar {
 public:
-    IntVar(std::unique_ptr<Domain> &&domain, std::string name) : domain_(std::move(domain)), name_(name) {}
+    IntVar(std::unique_ptr<Domain> &&domain, std::string name) : domain_(std::move(domain)), name_(name), encoded_(false) {}
 
     std::unique_ptr<Domain>& domain() { return domain_; }
     const std::unique_ptr<Domain>& domain() const { return domain_; }
     std::string name() const { return name_; }
-    DomainBoundingResult Bound(int lb, int ub) { return domain_->Bound(lb, ub); }
+    DomainBoundingResult Bound(int lb, int ub) {
+        if (encoded_) return kNoUpdate;
+        else return domain_->Bound(lb, ub);
+    }
+    bool IsEncoded() const { return encoded_; }
+    void SetEncoded() { encoded_ = true; }
 
 private:
     std::unique_ptr<Domain> domain_;
     std::string name_;
+    bool encoded_;
 };
 
 }
