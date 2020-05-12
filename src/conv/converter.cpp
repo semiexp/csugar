@@ -15,6 +15,7 @@ void Converter::Convert(CSP& csp, bool incremental) {
     for (int i = start_index; i < exprs.size(); ++i) {
         Convert(exprs[i]);
     }
+    csp.SetAllExprsConverted();
 }
 void Converter::ConvertConstraint(std::shared_ptr<Expr> expr) {
     std::vector<Clause> clauses = ConvertConstraint(expr, false);
