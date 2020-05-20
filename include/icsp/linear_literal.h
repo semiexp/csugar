@@ -5,7 +5,7 @@
 
 #include "icsp/literal.h"
 #include "icsp/linear_sum.h"
-#include "common/var.h"
+#include "icsp/var.h"
 
 namespace csugar {
 
@@ -27,8 +27,8 @@ public:
 
     std::string str() const override;
 
-    std::set<std::shared_ptr<IntVar>> IntVars() const;
-    std::pair<int, int> GetBound(std::shared_ptr<IntVar> v) const;
+    std::set<std::shared_ptr<ICSPIntVar>> IntVars() const;
+    std::pair<int, int> GetBound(std::shared_ptr<ICSPIntVar> v) const;
 
 private:
     LinearSum sum_;

@@ -5,9 +5,9 @@
 #include <string>
 #include <set>
 
-#include "common/var.h"
 #include "common/domain.h"
 #include "icsp/literal.h"
+#include "icsp/var.h"
 
 namespace csugar {
 
@@ -27,7 +27,7 @@ public:
 
     std::string str() const;
 
-    std::set<std::shared_ptr<IntVar>> GetCommonIntVars() const;
+    std::set<std::shared_ptr<ICSPIntVar>> GetCommonIntVars() const;
     bool IsValid() const;
     DomainBoundingResult Propagate();
     bool RemoveFalsefood();

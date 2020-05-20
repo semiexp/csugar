@@ -6,14 +6,14 @@
 #include <memory>
 
 #include "csp/expr.h"
-#include "common/var.h"
+#include "csp/var.h"
 #include "common/domain.h"
 
 namespace csugar {
 
 class CSP {
 public:
-    CSP() : converted_exprs_(0) {}
+    CSP() : converted_exprs_(0), num_bool_vars_(0), converted_bool_vars_(0), converted_int_vars_(0) {}
 
     const std::vector<std::shared_ptr<Expr>>& Exprs() const {
         return exprs_;
@@ -21,52 +21,45 @@ public:
     int NumConvertedExprs() const {
         return converted_exprs_;
     }
-    void SetAllExprsConverted() {
+    int NumConvertedBoolVars() const {
+        return converted_bool_vars_;
+    }
+    int NumConvertedIntVars() const {
+        return converted_int_vars_;
+    }
+    void SetAllConverted() {
         converted_exprs_ = exprs_.size();
+        converted_bool_vars_ = num_bool_vars_;
+        converted_int_vars_ = NumIntVars();
     }
-    const std::map<std::string, std::shared_ptr<BoolVar>>& BoolVars() const {
-        return bool_vars_;
+    int NumBoolVars() const {
+        return num_bool_vars_;
     }
-    const std::map<std::string, std::shared_ptr<IntVar>>& IntVars() const {
-        return int_vars_;
+    int NumIntVars() const {
+        return int_var_domains_.size();
+    }
+    const std::unique_ptr<Domain>& GetIntVarDomain(int i) const {
+        return int_var_domains_[i];
     }
     void AddExpr(std::shared_ptr<Expr> expr) {
         exprs_.push_back(expr);
     }
-    bool HasBoolVar(const std::string& name) {
-        return bool_vars_.count(name) > 0;
+    CSPBoolVar MakeBoolVar() {
+        return CSPBoolVar(num_bool_vars_++);
     }
-    void AddBoolVar(std::shared_ptr<BoolVar> var) {
-        if (bool_vars_.count(var->name()) > 0) {
-            // error
-        }
-        bool_vars_.insert({var->name(), var});
-    }
-    std::shared_ptr<BoolVar> AddBoolVar(const std::string& name) {
-        std::shared_ptr<BoolVar> ret = std::make_shared<BoolVar>(name);
-        AddBoolVar(ret);
-        return ret;
-    }
-    bool HasIntVar(const std::string& name) {
-        return int_vars_.count(name) > 0;
-    }
-    void AddIntVar(std::shared_ptr<IntVar> var) {
-        if (int_vars_.count(var->name()) > 0) {
-            // error
-        }
-        int_vars_.insert({var->name(), var});
-    }
-    std::shared_ptr<IntVar> AddIntVar(std::unique_ptr<Domain>&& domain, const std::string& name) {
-        std::shared_ptr<IntVar> ret = std::make_shared<IntVar>(std::move(domain), name);
-        AddIntVar(ret);
+    CSPIntVar MakeIntVar(std::unique_ptr<Domain>&& domain) {
+        CSPIntVar ret(static_cast<int>(int_var_domains_.size()));
+        int_var_domains_.push_back(std::move(domain));
         return ret;
     }
 
 private:
     std::vector<std::shared_ptr<Expr>> exprs_;
-    std::map<std::string, std::shared_ptr<BoolVar>> bool_vars_;
-    std::map<std::string, std::shared_ptr<IntVar>> int_vars_;
-    int converted_exprs_;
+    // std::map<std::string, std::shared_ptr<BoolVar>> bool_vars_;
+    // std::map<std::string, std::shared_ptr<IntVar>> int_vars_;
+    std::vector<std::unique_ptr<Domain>> int_var_domains_;
+    int num_bool_vars_;
+    int converted_exprs_, converted_bool_vars_, converted_int_vars_;
 };
 
 }

@@ -46,14 +46,14 @@ std::string LinearLiteral::str() const {
     }
     return ret;
 }
-std::set<std::shared_ptr<IntVar>> LinearLiteral::IntVars() const {
-    std::set<std::shared_ptr<IntVar>> ret;
+std::set<std::shared_ptr<ICSPIntVar>> LinearLiteral::IntVars() const {
+    std::set<std::shared_ptr<ICSPIntVar>> ret;
     for (auto coef_ : sum_.GetCoef()) {
         ret.insert(coef_.first);
     }
     return ret;
 }
-std::pair<int, int> LinearLiteral::GetBound(std::shared_ptr<IntVar> v) const {
+std::pair<int, int> LinearLiteral::GetBound(std::shared_ptr<ICSPIntVar> v) const {
     if (op_ == kLitNe) {
         return { v->domain()->GetLowerBound(), v->domain()->GetUpperBound() };
     }

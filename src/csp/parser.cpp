@@ -5,6 +5,7 @@
 #include <string>
 
 #include "csp/expr.h"
+#include "csp/var.h"
 
 namespace csugar {
 
@@ -52,7 +53,9 @@ std::string NextToken(const std::string& s, int& p) {
     }
     return ret;
 }
-std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p) {
+std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p,
+                                const std::map<std::string, CSPBoolVar>& bool_map,
+                                const std::map<std::string, CSPIntVar>& int_map) {
     if (p >= s.size()) {
         throw ParseError("unexpected end of line");
     }
@@ -70,7 +73,7 @@ std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p) {
                 break;
             } else if (s[p] == ' ') {
                 ++p;
-                auto sub = ParserSub(s, csp, p);
+                auto sub = ParserSub(s, csp, p, bool_map, int_map);
                 children.push_back(sub);
             } else {
                 throw ParseError("unexpected token");
@@ -88,10 +91,10 @@ std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p) {
         } else if (v == "false") {
             return Expr::ConstBool(false);
         } else {
-            if (csp.HasBoolVar(v)) {
-                return Expr::VarBool(v);
-            } else if (csp.HasIntVar(v)) {
-                return Expr::VarInt(v);
+            if (bool_map.count(v) > 0) {
+                return Expr::VarBool(bool_map.at(v));
+            } else if (int_map.count(v) > 0) {
+                return Expr::VarInt(int_map.at(v));
             } else {
                 throw ParseError("unknown variable name");
             }
@@ -100,9 +103,11 @@ std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p) {
 }
 }
 
-std::shared_ptr<Expr> StringToExpr(const std::string& s, CSP& csp) {
+std::shared_ptr<Expr> StringToExpr(const std::string& s, CSP& csp,
+                                   const std::map<std::string, CSPBoolVar>& bool_map,
+                                   const std::map<std::string, CSPIntVar>& int_map) {
     int p = 0;
-    return ParserSub(s, csp, p);
+    return ParserSub(s, csp, p, bool_map, int_map);
 }
 
 }

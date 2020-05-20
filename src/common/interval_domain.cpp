@@ -50,5 +50,8 @@ DomainBoundingResult IntervalDomain::Bound(int lb, int ub) {
     if (lb_ > ub_) return kEmptyDomain;
     return updated ? kUpdate : kNoUpdate;
 }
+std::unique_ptr<Domain> IntervalDomain::clone() const {
+    return std::make_unique<IntervalDomain>(lb_, ub_);
+}
 
 }

@@ -68,5 +68,8 @@ DomainBoundingResult EnumerativeDomain::Bound(int lb, int ub) {
     if (domain_.size() == 0) return kEmptyDomain;
     return removed ? kUpdate : kNoUpdate;
 }
+std::unique_ptr<Domain> EnumerativeDomain::clone() const {
+    return std::make_unique<EnumerativeDomain>(domain_);
+}
 
 }

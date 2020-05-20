@@ -23,10 +23,10 @@ void Encoder::Encode(bool incremental) {
     }
     icsp_.SetAllEncoded();
 }
-void Encoder::EncodeBoolVar(std::shared_ptr<BoolVar> var) {
+void Encoder::EncodeBoolVar(std::shared_ptr<ICSPBoolVar> var) {
     mapping_.RegisterMappingBool(var);
 }
-void Encoder::EncodeIntVar(std::shared_ptr<IntVar> var) {
+void Encoder::EncodeIntVar(std::shared_ptr<ICSPIntVar> var) {
     mapping_.RegisterMappingInt(var);
     var->SetEncoded();
 
@@ -129,7 +129,7 @@ void Encoder::EncodeLinearLeLiteral(std::shared_ptr<LinearLiteral> literal, cons
         LinearSum sum = literal->sum();
         int n = sum.size();
         std::vector<int> as;
-        std::vector<std::shared_ptr<IntVar>> vars;
+        std::vector<std::shared_ptr<ICSPIntVar>> vars;
 
         for (auto v : sum.GetVariablesSorted()) {
             vars.push_back(v);
@@ -146,7 +146,7 @@ void Encoder::EncodeLinearNeLiteral(std::shared_ptr<LinearLiteral> literal, cons
     LinearSum sum = literal->sum();
     int n = sum.size();
     std::vector<int> as;
-    std::vector<std::shared_ptr<IntVar>> vars;
+    std::vector<std::shared_ptr<ICSPIntVar>> vars;
 
     for (auto v : sum.GetVariablesSorted()) {
         vars.push_back(v);
@@ -168,7 +168,7 @@ void Encoder::EncodeLinearEqLiteral(std::shared_ptr<LinearLiteral> literal, cons
     EncodeLiteral(std::make_shared<LinearLiteral>(literal->sum(), kLitGe), clause);
 }
 void Encoder::EncodeLinearLe(const std::vector<int>& as,
-                             std::vector<std::shared_ptr<IntVar>>& vars,
+                             std::vector<std::shared_ptr<ICSPIntVar>>& vars,
                              int idx,
                              int b,
                              std::vector<SATLit>& clause) {
@@ -225,7 +225,7 @@ void Encoder::EncodeLinearLe(const std::vector<int>& as,
     }
 }
 void Encoder::EncodeLinearNe(const std::vector<int>& as,
-                             std::vector<std::shared_ptr<IntVar>>& vars,
+                             std::vector<std::shared_ptr<ICSPIntVar>>& vars,
                              int idx,
                              int b,
                              std::vector<SATLit>& clause) {

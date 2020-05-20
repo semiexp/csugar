@@ -8,6 +8,7 @@
 #include "csp/csp.h"
 #include "csp/parser.h"
 #include "csp/expr.h"
+#include "csp/var.h"
 #include "common/interval_domain.h"
 #include "common/enumerative_domain.h"
 #include "icsp/icsp.h"
@@ -48,7 +49,10 @@ bool IsIntDefinition(const std::string& s) {
     return s.substr(0, 4) == "(int";
 }
 
-CSP InputCSP(bool& has_answer_key, std::vector<std::string>& answer_keys) {
+CSP InputCSP(std::map<std::string, CSPBoolVar>& bool_var_map,
+             std::map<std::string, CSPIntVar>& int_var_map,
+             bool& has_answer_key,
+             std::vector<std::string>& answer_keys) {
     has_answer_key = false;
     answer_keys.clear();
 
@@ -69,28 +73,29 @@ CSP InputCSP(bool& has_answer_key, std::vector<std::string>& answer_keys) {
                 std::cerr << "invalid bool token" << std::endl;
                 exit(1);
             }
-            ret.AddBoolVar(toks[1]);
+            bool_var_map[toks[1]] = ret.MakeBoolVar();
         } else if (IsIntDefinition(line)) {
             auto toks = SplitDepthOneExpr(line);
             if (toks.size() != 4) {
                 std::cerr << "invalid bool token" << std::endl;
                 exit(1);
             }
-            ret.AddIntVar(std::make_unique<EnumerativeDomain>(std::stoi(toks[2]), std::stoi(toks[3])), toks[1]);
+            int_var_map[toks[1]] = ret.MakeIntVar(std::make_unique<EnumerativeDomain>(std::stoi(toks[2]), std::stoi(toks[3])));
         } else {
-            ret.AddExpr(StringToExpr(line, ret));
+            ret.AddExpr(StringToExpr(line, ret, bool_var_map, int_var_map));
         }
     }
 
     return std::move(ret);
 }
 
-void SolveIrrefutably(CSP& csp, std::vector<std::string>& answer_keys) {
+void SolveIrrefutably(CSP& csp,
+                      std::map<std::string, CSPBoolVar>& bool_var_map,
+                      std::map<std::string, CSPIntVar>& int_var_map,
+                      std::vector<std::string>& answer_keys) {
     ICSP icsp;
-    icsp.LoadVars(csp);
-
-    Converter conv(icsp);
-    conv.Convert(csp);
+    Converter conv(csp, icsp);
+    conv.Convert();
 
     icsp.Propagate();
 
@@ -118,10 +123,10 @@ void SolveIrrefutably(CSP& csp, std::vector<std::string>& answer_keys) {
     std::map<std::string, bool> not_refuted_bool;
     std::map<std::string, int> not_refuted_int;
     for (auto& name : answer_keys) {
-        if (icsp.HasBoolVar(name)) {
-            not_refuted_bool.insert({name, mapping.Retrieve(icsp.GetBoolVar(name), sol)});
-        } else if (icsp.HasIntVar(name)) {
-            not_refuted_int.insert({name, mapping.Retrieve(icsp.GetIntVar(name), sol)});
+        if (bool_var_map.count(name) > 0) {
+            not_refuted_bool.insert({name, mapping.Retrieve(conv.ConvertBoolVar(bool_var_map[name]), sol)});
+        } else if (int_var_map.count(name) > 0) {
+            not_refuted_int.insert({name, mapping.Retrieve(conv.ConvertIntVar(int_var_map[name]), sol)});
         } else {
             std::cout << "variable " << name << " not found" << std::endl;
             return;
@@ -130,13 +135,13 @@ void SolveIrrefutably(CSP& csp, std::vector<std::string>& answer_keys) {
     while (true) {
         std::vector<std::shared_ptr<Expr>> refuting_exprs;
         for (auto& p : not_refuted_bool) {
-            refuting_exprs.push_back(Expr::Make(kXor, {Expr::VarBool(p.first), Expr::ConstBool(p.second)}));
+            refuting_exprs.push_back(Expr::Make(kXor, {Expr::VarBool(bool_var_map[p.first]), Expr::ConstBool(p.second)}));
         }
         for (auto& p : not_refuted_int) {
-            refuting_exprs.push_back(Expr::Make(kNe, {Expr::VarInt(p.first), Expr::ConstInt(p.second)}));
+            refuting_exprs.push_back(Expr::Make(kNe, {Expr::VarInt(int_var_map[p.first]), Expr::ConstInt(p.second)}));
         }
         csp.AddExpr(std::make_shared<Expr>(kOr, refuting_exprs));
-        conv.Convert(csp, true);
+        conv.Convert(true);
         simp.Simplify(true);
         enc.Encode(true);
 
@@ -144,14 +149,14 @@ void SolveIrrefutably(CSP& csp, std::vector<std::string>& answer_keys) {
         if (sol.size() == 0) break;
     
         for (auto it = not_refuted_bool.begin(); it != not_refuted_bool.end(); ) {
-            if (mapping.Retrieve(icsp.GetBoolVar(it->first), sol) != it->second) {
+            if (mapping.Retrieve(conv.ConvertBoolVar(bool_var_map[it->first]), sol) != it->second) {
                 it = not_refuted_bool.erase(it);
             } else {
                 ++it;
             }
         }
         for (auto it = not_refuted_int.begin(); it != not_refuted_int.end(); ) {
-            if (mapping.Retrieve(icsp.GetIntVar(it->first), sol) != it->second) {
+            if (mapping.Retrieve(conv.ConvertIntVar(int_var_map[it->first]), sol) != it->second) {
                 it = not_refuted_int.erase(it);
             } else {
                 ++it;
@@ -167,12 +172,13 @@ void SolveIrrefutably(CSP& csp, std::vector<std::string>& answer_keys) {
     }
 }
 
-void FindAnswer(CSP& csp) {
+void FindAnswer(CSP& csp,
+                std::map<std::string, CSPBoolVar>& bool_var_map,
+                std::map<std::string, CSPIntVar>& int_var_map) {
     ICSP icsp;
-    icsp.LoadVars(csp);
 
-    Converter conv(icsp);
-    conv.Convert(csp);
+    Converter conv(csp, icsp);
+    conv.Convert();
 
     icsp.Propagate();
 
@@ -183,7 +189,6 @@ void FindAnswer(CSP& csp) {
         std::cout << "s UNSATISFIABLE" << std::endl;
         return;
     }
-
     SAT sat;
     Mapping mapping(sat);
     Encoder enc(icsp, sat, mapping);
@@ -195,11 +200,11 @@ void FindAnswer(CSP& csp) {
         std::cout << "s UNSATISFIABLE" << std::endl;
     } else {
         std::cout << "s SATISFIABLE" << std::endl;
-        for (auto& vars : csp.BoolVars()) {
-            std::cout << "a " << vars.first << '\t' << (mapping.Retrieve(icsp.GetBoolVar(vars.first), sol) ? "true" : "false") << std::endl; 
+        for (auto& vars : bool_var_map) {
+            std::cout << "a " << vars.first << '\t' << (mapping.Retrieve(conv.ConvertBoolVar(vars.second), sol) ? "true" : "false") << std::endl; 
         }
-        for (auto& vars : csp.IntVars()) {
-            std::cout << "a " << vars.first << '\t' << mapping.Retrieve(icsp.GetIntVar(vars.first), sol) << std::endl; 
+        for (auto& vars : int_var_map) {
+            std::cout << "a " << vars.first << '\t' << mapping.Retrieve(conv.ConvertIntVar(vars.second), sol) << std::endl; 
         }
         std::cout << "a" << std::endl;
     }
@@ -208,12 +213,14 @@ void FindAnswer(CSP& csp) {
 int main() {
     bool has_answer_key;
     std::vector<std::string> answer_keys;
-    CSP input = InputCSP(has_answer_key, answer_keys);
+    std::map<std::string, CSPBoolVar> bool_var_map;
+    std::map<std::string, CSPIntVar> int_var_map;
+    CSP input = InputCSP(bool_var_map, int_var_map, has_answer_key, answer_keys);
 
     if (has_answer_key) {
-        SolveIrrefutably(input, answer_keys);
+        SolveIrrefutably(input, bool_var_map, int_var_map, answer_keys);
     } else {
-        FindAnswer(input);
+        FindAnswer(input, bool_var_map, int_var_map);
     }
 
     return 0;

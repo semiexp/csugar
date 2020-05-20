@@ -8,23 +8,24 @@
 
 namespace csugar {
 
-class BoolVar {
+class ICSPBoolVar {
 public:
-    BoolVar(std::string name) : name_(name) {}
+    ICSPBoolVar(int id) : id_(id) {}
 
-    std::string name() const { return name_; }
+    int id() const { return id_; }
 
 private:
-    std::string name_;
+    int id_;
 };
 
-class IntVar {
+class ICSPIntVar {
 public:
-    IntVar(std::unique_ptr<Domain> &&domain, std::string name) : domain_(std::move(domain)), name_(name), encoded_(false) {}
+    ICSPIntVar(std::unique_ptr<Domain> &&domain, int id) : domain_(std::move(domain)), id_(id), encoded_(false) {}
 
     std::unique_ptr<Domain>& domain() { return domain_; }
     const std::unique_ptr<Domain>& domain() const { return domain_; }
-    std::string name() const { return name_; }
+    int id() const { return id_; }
+
     DomainBoundingResult Bound(int lb, int ub) {
         if (encoded_) return kNoUpdate;
         else return domain_->Bound(lb, ub);
@@ -34,7 +35,7 @@ public:
 
 private:
     std::unique_ptr<Domain> domain_;
-    std::string name_;
+    int id_;
     bool encoded_;
 };
 

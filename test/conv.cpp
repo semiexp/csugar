@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "csp/expr.h"
-#include "common/var.h"
+#include "csp/var.h"
 #include "common/interval_domain.h"
 #include "icsp/icsp.h"
 #include "conv/converter.h"
@@ -21,35 +21,36 @@ void RunConvertTests() {
 }
 
 void ConvertTest1() {
+    CSP csp;
+    auto a = csp.MakeBoolVar();
+    auto b = csp.MakeBoolVar();
+
     // a xor b
-    auto ex = Expr::Make(kXor, {Expr::VarBool("a"), Expr::VarBool("b")});
-
+    csp.AddExpr(Expr::Make(kXor, {Expr::VarBool(a), Expr::VarBool(b)}));
     ICSP icsp;
-    icsp.AddBoolVar(std::make_shared<BoolVar>("a"));
-    icsp.AddBoolVar(std::make_shared<BoolVar>("b"));
-
-    Converter conv(icsp);
-    conv.Convert(ex);
+    Converter conv(csp, icsp);
+    conv.Convert();
 
     assert(icsp.NumClauses() == 2);
-    assert(icsp.GetClause(0).str() == "[a b]");
-    assert(icsp.GetClause(1).str() == "[!a !b]");
+    assert(icsp.GetClause(0).str() == "[b0 b1]");
+    assert(icsp.GetClause(1).str() == "[!b0 !b1]");
 }
 
 void ConvertTest2() {
     // a + a < b + 2
-    auto ex = Expr::Make(kLt, {
-        Expr::Make(kAdd, {Expr::VarInt("a"), Expr::VarInt("a")}),
-        Expr::Make(kAdd, {Expr::VarInt("b"), Expr::ConstInt(2)}),
-    });
+    CSP csp;
+    auto a = csp.MakeIntVar(std::make_unique<IntervalDomain>(0, 10));
+    auto b = csp.MakeIntVar(std::make_unique<IntervalDomain>(0, 10));
+
+    csp.AddExpr(Expr::Make(kLt, {
+        Expr::Make(kAdd, {Expr::VarInt(a), Expr::VarInt(a)}),
+        Expr::Make(kAdd, {Expr::VarInt(b), Expr::ConstInt(2)}),
+    }));
 
     ICSP icsp;
-    icsp.AddIntVar(std::make_shared<IntVar>(std::make_unique<IntervalDomain>(0, 10), "a"));
-    icsp.AddIntVar(std::make_shared<IntVar>(std::make_unique<IntervalDomain>(0, 10), "b"));
-
-    Converter conv(icsp);
-    conv.Convert(ex);
+    Converter conv(csp, icsp);
+    conv.Convert();
 
     assert(icsp.NumClauses() == 1);
-    assert(icsp.GetClause(0).str() == "[a*2+b*-1+-1<=0]");
+    assert(icsp.GetClause(0).str() == "[i0*2+i1*-1+-1<=0]");
 }

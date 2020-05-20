@@ -31,7 +31,7 @@ std::vector<Clause> Simplifier::Simplify(Clause &clause) {
                 c.Add(lit);
             } else {
                 // TODO: simplify cache
-                auto p = icsp_.AuxiliaryBoolVar();
+                auto p = icsp_.MakeBoolVar();
                 std::shared_ptr<Literal> pos = std::make_shared<BoolLiteral>(p, false);
                 std::shared_ptr<Literal> neg = std::make_shared<BoolLiteral>(p, true);
 

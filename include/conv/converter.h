@@ -4,7 +4,9 @@
 
 #include "csp/csp.h"
 #include "csp/expr.h"
+#include "csp/var.h"
 #include "icsp/icsp.h"
+#include "icsp/var.h"
 #include "icsp/linear_sum.h"
 #include "icsp/linear_literal.h"
 #include "common/config.h"
@@ -13,14 +15,24 @@ namespace csugar {
 
 class Converter {
 public:
-    Converter(ICSP &icsp) : icsp_(icsp) {}
+    Converter(CSP& csp, ICSP &icsp) : csp_(csp), icsp_(icsp) {}
 
-    void Convert(std::shared_ptr<Expr> expr) {
-        ConvertConstraint(expr);
-    }
-    void Convert(CSP& csp, bool incremental = false);
+    void Convert(bool incremental = false);
     Config GetConfig() const { return config_; }
     void SetCofig(const Config& config) { config_ = config; }
+
+    std::shared_ptr<ICSPBoolVar> ConvertBoolVar(const CSPBoolVar &var) {
+        if (0 <= var.id() && var.id() < bool_var_conv_.size()) {
+            return bool_var_conv_[var.id()];
+        }
+        abort(); // TODO
+    }
+    std::shared_ptr<ICSPIntVar> ConvertIntVar(const CSPIntVar &var) {
+        if (0 <= var.id() && var.id() < int_var_conv_.size()) {
+            return int_var_conv_[var.id()];
+        }
+        abort(); // TODO
+    }
 
 private:
     void ConvertConstraint(std::shared_ptr<Expr> expr);
@@ -34,20 +46,23 @@ private:
     LinearSum ReduceArity(const LinearSum &e, LinearLiteralOp op);
     LinearSum SimplifyLinearExpression(const LinearSum& e, LinearLiteralOp op, bool first);
 
-    std::shared_ptr<IntVar> GetEquivalence(std::shared_ptr<Expr> x) {
+    std::shared_ptr<ICSPIntVar> GetEquivalence(std::shared_ptr<Expr> x) {
         // TODO
         for (auto& p : cache_) {
             if (Expr::Equal(x, p.first)) return p.second;
         }
-        return std::shared_ptr<IntVar>(nullptr);
+        return std::shared_ptr<ICSPIntVar>(nullptr);
     }
-    void AddEquivalence(std::shared_ptr<IntVar> v, std::shared_ptr<Expr> x) {
+    void AddEquivalence(std::shared_ptr<ICSPIntVar> v, std::shared_ptr<Expr> x) {
         // TODO
         cache_.push_back({x, v});
     }
 
+    CSP& csp_;
     ICSP& icsp_;
-    std::vector<std::pair<std::shared_ptr<Expr>, std::shared_ptr<IntVar>>> cache_;
+    std::vector<std::pair<std::shared_ptr<Expr>, std::shared_ptr<ICSPIntVar>>> cache_;
+    std::vector<std::shared_ptr<ICSPBoolVar>> bool_var_conv_;
+    std::vector<std::shared_ptr<ICSPIntVar>> int_var_conv_;
     Config config_;
 };
 

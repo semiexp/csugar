@@ -26,6 +26,8 @@ public:
     std::unique_ptr<Domain> Cup(const std::unique_ptr<Domain>& other) const override;
     DomainBoundingResult Bound(int lb, int ub) override;
 
+    virtual std::unique_ptr<Domain> clone() const override;
+
 private:
     std::set<int> domain_;
 };

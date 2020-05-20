@@ -22,9 +22,9 @@ std::string Clause::str() const {
     ret.push_back(']');
     return ret;
 }
-std::set<std::shared_ptr<IntVar>> Clause::GetCommonIntVars() const {
+std::set<std::shared_ptr<ICSPIntVar>> Clause::GetCommonIntVars() const {
     if (size() == 0) return {};
-    std::set<std::shared_ptr<IntVar>> ret = literals_[0]->IntVars();
+    std::set<std::shared_ptr<ICSPIntVar>> ret = literals_[0]->IntVars();
     for (int i = 1; i < size(); ++i) {
         auto tmp = literals_[i]->IntVars();
         for (auto it = ret.begin(); it != ret.end(); ) {

@@ -5,6 +5,9 @@
 #include <string>
 #include <initializer_list>
 
+#include "csp/var.h"
+#include "icsp/var.h"
+
 namespace csugar {
 
 enum ExprType {
@@ -36,6 +39,7 @@ enum ExprType {
     kMax,
     kIf,
     kAllDifferent,
+    kInternalVariableInt,
 };
 
 class Expr {
@@ -50,7 +54,9 @@ public:
     std::shared_ptr<Expr> operator[](int i) { return children_[i]; }
     int AsConstantInt() const { return constant_int_; }
     bool AsConstantBool() const { return constant_bool_; }
-    std::string VariableName() const { return name_; }
+    const CSPBoolVar& AsBoolVar() const { return bool_var_; }
+    const CSPIntVar& AsIntVar() const { return int_var_; }
+    const std::shared_ptr<ICSPIntVar>& AsInternalIntVar() const { return icsp_int_var_; }
 
     bool IsLogical() const {
         return type_ == kConstantBool || type_ == kVariableBool || type_ == kNot || type_ == kAnd
@@ -91,21 +97,28 @@ public:
         ret->constant_bool_ = b;
         return ret;
     }
-    static std::shared_ptr<Expr> VarBool(const std::string &name) {
+    static std::shared_ptr<Expr> VarBool(const CSPBoolVar& var) {
         auto ret = Expr::Make(kVariableBool);
-        ret->name_ = name;
+        ret->bool_var_ = var;
         return ret;
     }
-    static std::shared_ptr<Expr> VarInt(const std::string &name) {
+    static std::shared_ptr<Expr> VarInt(const CSPIntVar& var) {
         auto ret = Expr::Make(kVariableInt);
-        ret->name_ = name;
+        ret->int_var_ = var;
+        return ret;
+    }
+    static std::shared_ptr<Expr> InternalVarInt(const std::shared_ptr<ICSPIntVar>& var) {
+        auto ret = Expr::Make(kInternalVariableInt);
+        ret->icsp_int_var_ = var;
         return ret;
     }
     static bool Equal(const std::shared_ptr<Expr>& lhs, const std::shared_ptr<Expr>& rhs);
 private:
     ExprType type_;
     std::vector<std::shared_ptr<Expr>> children_;
-    std::string name_;
+    CSPBoolVar bool_var_;
+    CSPIntVar int_var_;
+    std::shared_ptr<ICSPIntVar> icsp_int_var_;
     union {
         int constant_int_;
         bool constant_bool_;

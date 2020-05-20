@@ -24,6 +24,8 @@ public:
     virtual std::unique_ptr<Domain> Mul(int other) const = 0;
     virtual std::unique_ptr<Domain> Cup(const std::unique_ptr<Domain>& other) const = 0;
     virtual DomainBoundingResult Bound(int lb, int ub) = 0;
+
+    virtual std::unique_ptr<Domain> clone() const = 0;
 };
 
 }

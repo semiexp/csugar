@@ -22,7 +22,7 @@ int gcd(int a, int b)
 
 namespace csugar {
 
-std::unique_ptr<Domain> LinearSum::GetDomainExcept(std::shared_ptr<IntVar> except) const {
+std::unique_ptr<Domain> LinearSum::GetDomainExcept(std::shared_ptr<ICSPIntVar> except) const {
     std::unique_ptr<Domain> ret = std::make_unique<IntervalDomain>(b_);
     for (auto& it : coef_) {
         if (it.first != except) {
@@ -48,12 +48,12 @@ void LinearSum::Factorize() {
     int g = Factor();
     if (g != 0) Divide(g);
 }
-std::vector<std::shared_ptr<IntVar>> LinearSum::GetVariablesSorted() const {
-    std::vector<std::shared_ptr<IntVar>> ret;
+std::vector<std::shared_ptr<ICSPIntVar>> LinearSum::GetVariablesSorted() const {
+    std::vector<std::shared_ptr<ICSPIntVar>> ret;
     for (auto& p : coef_) {
         ret.push_back(p.first);
     }
-    std::sort(ret.begin(), ret.end(), [](std::shared_ptr<IntVar>& l, std::shared_ptr<IntVar>& r) {
+    std::sort(ret.begin(), ret.end(), [](std::shared_ptr<ICSPIntVar>& l, std::shared_ptr<ICSPIntVar>& r) {
         return l->domain()->size() < r->domain()->size();
     });
     return ret;
@@ -82,14 +82,14 @@ LinearSum& LinearSum::operator*=(int rhs) {
     return *this;
 }
 std::string LinearSum::str() const {
-    // For reproducibility, variables are sorted by their names
-    std::map<std::string, int> coef_sorted;
+    // For reproducibility, variables are sorted by ids
+    std::map<int, int> coef_sorted;
     for (auto& it : coef_) {
-        coef_sorted.insert({it.first->name(), it.second});
+        coef_sorted.insert({it.first->id(), it.second});
     }
     std::string ret;
     for (auto& it : coef_sorted) {
-        ret += it.first;
+        ret += std::string("i") + std::to_string(it.first);
         ret.push_back('*');
         ret += std::to_string(it.second);
         ret.push_back('+');
@@ -123,11 +123,11 @@ void LinearSum::WeightedAdd(const LinearSum& other, int w) {
         }
     }
 }
-std::shared_ptr<Expr> LinearSum::ToExpr() const {
+std::shared_ptr<Expr> LinearSum::ToExpr() {
     std::vector<std::shared_ptr<Expr>> ch;
     ch.push_back(Expr::ConstInt(b_));
     for (auto& p : coef_) {
-        ch.push_back(Expr::Make(kMul, { Expr::VarInt(p.first->name()), Expr::ConstInt(p.second) }));
+        ch.push_back(Expr::Make(kMul, { Expr::InternalVarInt(p.first), Expr::ConstInt(p.second) }));
     }
     return std::make_shared<Expr>(kAdd, ch);
 }

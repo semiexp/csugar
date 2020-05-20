@@ -7,10 +7,10 @@
 #include "icsp/clause.h"
 #include "icsp/literal.h"
 #include "icsp/linear_literal.h"
+#include "icsp/var.h"
 #include "sat/sat.h"
 #include "sat/satlit.h"
 #include "sat/mapping.h"
-#include "common/var.h"
 #include "common/util.h"
 
 namespace csugar {
@@ -20,14 +20,14 @@ public:
     Encoder(ICSP& icsp, SAT& sat, Mapping& mapping) : icsp_(icsp), sat_(sat), mapping_(mapping) {}
 
     void Encode(bool incremental = false);
-    void EncodeBoolVar(std::shared_ptr<BoolVar> var);
-    void EncodeIntVar(std::shared_ptr<IntVar> var);
+    void EncodeBoolVar(std::shared_ptr<ICSPBoolVar> var);
+    void EncodeIntVar(std::shared_ptr<ICSPIntVar> var);
     void EncodeClause(const Clause& clause);
 private:
-    SATLit GetCodeLE(std::shared_ptr<const IntVar> var, int c) {
+    SATLit GetCodeLE(std::shared_ptr<ICSPIntVar> var, int c) {
         return mapping_.GetCodeLE(var, c);
     }
-    SATLit GetCodeLE(std::shared_ptr<const IntVar> var, int a, int b) { // v * a <= b
+    SATLit GetCodeLE(std::shared_ptr<ICSPIntVar> var, int a, int b) { // v * a <= b
         if (a == 0) {
             if (b >= 0) return sat_.True();
             else return sat_.False();
@@ -47,12 +47,12 @@ private:
 
     // as[idx] * vars[idx] + ... + b <= 0
     void EncodeLinearLe(const std::vector<int>& as,
-                        std::vector<std::shared_ptr<IntVar>>& vars,
+                        std::vector<std::shared_ptr<ICSPIntVar>>& vars,
                         int idx,
                         int b,
                         std::vector<SATLit>& clause);
     void EncodeLinearNe(const std::vector<int>& as,
-                        std::vector<std::shared_ptr<IntVar>>& vars,
+                        std::vector<std::shared_ptr<ICSPIntVar>>& vars,
                         int idx,
                         int b,
                         std::vector<SATLit>& clause);

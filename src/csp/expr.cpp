@@ -8,8 +8,12 @@ bool Expr::Equal(const std::shared_ptr<Expr>& lhs, const std::shared_ptr<Expr>& 
         return lhs->AsConstantBool() == rhs->AsConstantBool();
     } else if (lhs->type() == kConstantInt) {
         return lhs->AsConstantInt() == rhs->AsConstantInt();
-    } else if (lhs->type() == kVariableBool || lhs->type() == kVariableInt) {
-        return lhs->VariableName() == rhs->VariableName();
+    } else if (lhs->type() == kVariableBool) {
+        return lhs->AsBoolVar().id() == rhs->AsBoolVar().id();
+    } else if (lhs->type() == kVariableInt) {
+        return lhs->AsIntVar().id() == rhs->AsIntVar().id();
+    } else if (lhs->type() == kInternalVariableInt) {
+        return lhs->AsInternalIntVar() == rhs->AsInternalIntVar();
     }
     if (lhs->size() != rhs->size()) return false;
     for (int i = 0; i < lhs->size(); ++i) {

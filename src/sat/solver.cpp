@@ -26,9 +26,11 @@ std::vector<bool> Solver::Solve(bool incremental) {
         Minisat::vec<Minisat::Lit> c;
         for (SATLit lit : clause) {
             if (lit != SAT::False()) {
+                //printf("%d ", (lit.IsNegative() ? -1 : 1) * (lit.GetVariable() + 1));
                 c.push(Minisat::mkLit(lit.GetVariable(), lit.IsNegative()));
             }
         }
+        //printf("0\n");
         actual_solver_->addClause_(c);
     }
     sat_.SetAllSolved();

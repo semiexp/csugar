@@ -2,20 +2,25 @@
 
 #include <memory>
 
-#include "common/var.h"
 #include "icsp/bool_literal.h"
 #include "icsp/linear_sum.h"
 #include "icsp/linear_literal.h"
 
 namespace csugar {
 
-void Converter::Convert(CSP& csp, bool incremental) {
-    auto& exprs = csp.Exprs();
-    int start_index = incremental ? csp.NumConvertedExprs() : 0;
-    for (int i = start_index; i < exprs.size(); ++i) {
-        Convert(exprs[i]);
+void Converter::Convert(bool incremental) {
+    for (int i = incremental ? csp_.NumConvertedBoolVars() : 0; i < csp_.NumBoolVars(); ++i) {
+        bool_var_conv_.push_back(icsp_.MakeBoolVar());
     }
-    csp.SetAllExprsConverted();
+    for (int i = incremental ? csp_.NumConvertedIntVars() : 0; i < csp_.NumIntVars(); ++i) {
+        int_var_conv_.push_back(icsp_.MakeIntVar(csp_.GetIntVarDomain(i)->clone()));
+    }
+    auto& exprs = csp_.Exprs();
+    int start_index = incremental ? csp_.NumConvertedExprs() : 0;
+    for (int i = start_index; i < exprs.size(); ++i) {
+        ConvertConstraint(exprs[i]);
+    }
+    csp_.SetAllConverted();
 }
 void Converter::ConvertConstraint(std::shared_ptr<Expr> expr) {
     std::vector<Clause> clauses = ConvertConstraint(expr, false);
@@ -40,7 +45,7 @@ std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, boo
             }
             break;
         } else if (expr->type() == kVariableBool) {
-            clauses.push_back(Clause(std::make_shared<BoolLiteral>(icsp_.GetBoolVar(expr->VariableName()), negative)));
+            clauses.push_back(Clause(std::make_shared<BoolLiteral>(ConvertBoolVar(expr->AsBoolVar()), negative)));
             break;
         } else if (expr->type() == kAllDifferent) {
             expr = ConvertAllDifferent(expr);
@@ -100,7 +105,7 @@ std::vector<Clause> Converter::ConvertDisj(std::shared_ptr<Expr> expr, bool nega
                     aux_clause.Add(c[j]);
                 }
             } else {
-                auto v = icsp_.AuxiliaryBoolVar();
+                auto v = icsp_.MakeBoolVar();
                 auto v0 = std::make_shared<BoolLiteral>(v, false);
                 auto v1 = std::make_shared<BoolLiteral>(v, true);
                 aux_clause.Add(v0);
@@ -182,10 +187,9 @@ LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
     } else if (expr->type() == kConstantInt) {
         return LinearSum(expr->AsConstantInt());
     } else if (expr->type() == kVariableInt) {
-        if (!icsp_.HasIntVar(expr->VariableName())) {
-            // TODO: error
-        }
-        return LinearSum(icsp_.GetIntVar(expr->VariableName()));
+        return LinearSum(ConvertIntVar(expr->AsIntVar()));
+    } else if (expr->type() == kInternalVariableInt) {
+        return LinearSum(expr->AsInternalIntVar());
     } else if (expr->type() == kAdd) {
         LinearSum ret(0);
         for (int i = 0; i < expr->size(); ++i) {
@@ -231,8 +235,8 @@ LinearSum Converter::ConvertFormula(std::shared_ptr<Expr> expr) {
         LinearSum s2 = ConvertFormula(x2), s3 = ConvertFormula(x3);
         std::unique_ptr<Domain> d2 = s2.GetDomain(), d3 = s3.GetDomain();
         std::unique_ptr<Domain> d = d2->Cup(d3);
-        auto v = icsp_.AuxiliaryIntVar(std::move(d));
-        auto x = Expr::VarInt(v->name());
+        auto v = icsp_.MakeIntVar(std::move(d));
+        auto x = Expr::InternalVarInt(v);
         auto eq = Expr::And(Expr::Or(Expr::Not(x1), Expr::Eq(x, x2)), Expr::Or(x1, Expr::Eq(x, x3)));
         ConvertConstraint(eq);
         AddEquivalence(v, expr);
@@ -267,7 +271,7 @@ LinearSum Converter::SimplifyLinearExpression(const LinearSum& e, LinearLiteralO
         }
         ei = SimplifyLinearExpression(ei, kLitEq, false);
         if (ei.size() > 1) {
-            auto v = icsp_.AuxiliaryIntVar(ei.GetDomain());
+            auto v = icsp_.MakeIntVar(ei.GetDomain());
             auto ei_expr = ei.ToExpr();
             
             ExprType type;
@@ -275,7 +279,7 @@ LinearSum Converter::SimplifyLinearExpression(const LinearSum& e, LinearLiteralO
             else if (op == kLitLe) type = kGe;
             else type = kEq;
 
-            ConvertConstraint(Expr::Make(type, { Expr::VarInt(v->name()), ei_expr }));
+            ConvertConstraint(Expr::Make(type, { Expr::InternalVarInt(v), ei_expr }));
             ei = LinearSum(v);
         }
         if (factor > 1) {

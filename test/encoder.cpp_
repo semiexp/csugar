@@ -1,0 +1,92 @@
+#include "tests.h"
+
+#include <cassert>
+#include <iostream>
+#include <memory>
+
+#include "csp/expr.h"
+#include "csp/csp.h"
+#include "csp/parser.h"
+#include "common/var.h"
+#include "common/interval_domain.h"
+#include "icsp/icsp.h"
+#include "sat/sat.h"
+#include "sat/mapping.h"
+#include "conv/converter.h"
+#include "conv/simplifier.h"
+#include "conv/encoder.h"
+#include "sat/solver.h"
+
+using namespace csugar;
+
+void EncoderTest1();
+
+void RunEncoderTests() {
+    EncoderTest1();
+}
+
+void EncoderTest1() {
+    auto a = std::make_shared<IntVar>(std::make_unique<IntervalDomain>(0, 12), "a");
+    auto b = std::make_shared<IntVar>(std::make_unique<IntervalDomain>(0, 12), "b");
+    CSP csp;
+    csp.AddIntVar(a);
+    csp.AddIntVar(b);
+    //csp.AddExpr(StringToExpr("(>= a 5)", csp));
+    csp.AddExpr(StringToExpr("(< (+ a a) b)", csp));
+    csp.AddExpr(StringToExpr("(< (+ b 1) (+ a a a))", csp));
+    csp.AddExpr(StringToExpr("(< (- b a) 5)", csp));
+    // a + a < b + 2
+    //auto ex = Expr::Make(kGt, {
+    //    Expr::Make(kAdd, {Expr::VarInt("a"), Expr::VarInt("a")}),
+    //    Expr::Make(kAdd, {Expr::VarInt("b"), Expr::ConstInt(2)}),
+    //});
+    //csp.AddExpr(ex);
+    //auto ex2 = Expr::Make(kGt, {
+    //    Expr::Make(kAdd, {Expr::VarInt("a"), Expr::VarInt("a")}),
+    //    Expr::Make(kAdd, {Expr::VarInt("b"), Expr::ConstInt(2)}),
+    //});
+    //csp.AddExpr(ex2);
+
+    ICSP icsp;
+    icsp.LoadVars(csp);
+
+    Converter conv(icsp);
+    for (auto expr : csp.Exprs()) {
+        conv.Convert(expr);
+    }
+
+    Simplifier simp(icsp);
+    simp.Simplify();
+
+    for (int i = 0; i < icsp.NumClauses(); ++i) {
+        std::cout << icsp.GetClause(i).str() << std::endl;
+    }
+    SAT sat;
+    Mapping mapping(sat);
+    Encoder enc(icsp, sat, mapping);
+    enc.Encode();
+
+    /*
+    std::cout << sat.n_variables << ' ' << sat.clauses.size() << std::endl;
+    for (auto& clause : sat.clauses) {
+        for (int i = 0; i < clause.size(); ++i) {
+            if (clause[i].IsNegative()) {
+                std::cout << '!';
+            }
+            std::cout << clause[i].GetVariable();
+            if (i == clause.size() - 1) std::cout << std::endl;
+            else std::cout << ' ';
+        }
+    }
+    */
+
+    Solver solver(sat);
+    auto sol = solver.Solve();
+    if (sol.size() == 0) {
+        std::cout << "unsat" << std::endl;
+    } else {
+        std::cout << "sat" << std::endl;
+        std::cout << "a " << mapping.Retrieve(a, sol) << std::endl;
+        std::cout << "b " << mapping.Retrieve(b, sol) << std::endl;
+    }
+}
