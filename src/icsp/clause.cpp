@@ -52,6 +52,7 @@ DomainBoundingResult Clause::Propagate() {
         }
         DomainBoundingResult res = var->Bound(bound.first, bound.second);
         ret = std::max(ret, res);
+        if (ret == kEmptyDomain) break;
     }
     return ret;
 }
