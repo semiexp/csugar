@@ -40,6 +40,7 @@ enum ExprType {
     kIf,
     kAllDifferent,
     kInternalVariableInt,
+    kGraphActiveVerticesConnected,
 };
 
 class Expr {

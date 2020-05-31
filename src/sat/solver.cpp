@@ -33,6 +33,9 @@ std::vector<bool> Solver::Solve(bool incremental) {
         //printf("0\n");
         actual_solver_->addClause_(c);
     }
+    for (int i = incremental ? sat_.NumSolverConstraints() : 0; i < sat_.NumConstraints(); ++i) {
+        actual_solver_->addConstraint(sat_.GetConstraint(i)->Emit());
+    }
     sat_.SetAllSolved();
 
     if (!actual_solver_->simplify()) {

@@ -36,10 +36,11 @@ public:
 
 private:
     void ConvertConstraint(std::shared_ptr<Expr> expr);
-    std::vector<Clause> ConvertConstraint(std::shared_ptr<Expr> expr, bool negative);
+    std::vector<Clause> ConvertConstraint(std::shared_ptr<Expr> expr, bool negative, bool top_level = false);
     std::shared_ptr<Expr> ConvertLogical(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses);
     std::vector<Clause> ConvertDisj(std::shared_ptr<Expr> expr, bool negative);
     std::shared_ptr<Expr> ConvertAllDifferent(std::shared_ptr<Expr> expr);
+    std::shared_ptr<Literal> ConvertGraphConstraints(std::shared_ptr<Expr> expr);
     std::shared_ptr<Expr> ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses);
     std::vector<Clause> ConvertComparison(std::shared_ptr<Expr> x, std::shared_ptr<Expr> y, LinearLiteralOp op);
     LinearSum ConvertFormula(std::shared_ptr<Expr> expr);

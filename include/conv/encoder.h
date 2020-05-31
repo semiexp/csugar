@@ -6,6 +6,7 @@
 #include "icsp/icsp.h"
 #include "icsp/clause.h"
 #include "icsp/literal.h"
+#include "icsp/graph_literal.h"
 #include "icsp/linear_literal.h"
 #include "icsp/var.h"
 #include "sat/sat.h"
@@ -56,6 +57,8 @@ private:
                         int idx,
                         int b,
                         std::vector<SATLit>& clause);
+
+    void EncodeGraphLiteral(std::shared_ptr<GraphLiteral> literal);
     ICSP &icsp_;
     SAT &sat_;
     Mapping &mapping_;

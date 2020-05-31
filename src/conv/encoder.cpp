@@ -5,8 +5,10 @@
 
 #include "icsp/clause.h"
 #include "icsp/bool_literal.h"
+#include "icsp/graph_literal.h"
 #include "icsp/linear_literal.h"
 #include "icsp/linear_sum.h"
+#include "sat/constraints.h"
 #include "common/util.h"
 
 namespace csugar {
@@ -42,6 +44,19 @@ void Encoder::EncodeClause(const Clause& clause) {
     // check validity
     if (!clause.IsSimple()) {
         // TODO: error
+    }
+
+    std::shared_ptr<GraphLiteral> graph_literal(nullptr);
+    for (int i = 0; i < clause.size(); ++i) {
+        if (std::shared_ptr<GraphLiteral> g = std::dynamic_pointer_cast<GraphLiteral>(clause[i])) {
+            if (!graph_literal) graph_literal = g;
+            else abort();
+        }
+    }
+
+    if (graph_literal) {
+        EncodeGraphLiteral(graph_literal);
+        return;
     }
 
     std::vector<SATLit> sat_clause;
@@ -247,6 +262,17 @@ void Encoder::EncodeLinearNe(const std::vector<int>& as,
                 EncodeLinearNe(as, vars, idx + 1, b + a * c, clause);
             }
         }
+    }
+}
+void Encoder::EncodeGraphLiteral(std::shared_ptr<GraphLiteral> literal) {
+    if (literal->kind() == kActiveVerticesConnectedLiteral) {
+        std::vector<SATLit> vars;
+        for (int i = 0; i < literal->vars().size(); ++i) {
+            SATLit lit = mapping_.GetCode(literal->vars()[i]);
+            if (literal->is_negative()[i]) lit = !lit;
+            vars.push_back(lit);
+        }
+        sat_.AddConstraint(std::make_shared<ActiveVerticesConnectedConstraint>(vars, literal->edges()));
     }
 }
 }

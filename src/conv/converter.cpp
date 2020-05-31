@@ -1,10 +1,13 @@
 #include "conv/converter.h"
 
 #include <memory>
+#include <cassert>
+#include <algorithm>
 
 #include "icsp/bool_literal.h"
 #include "icsp/linear_sum.h"
 #include "icsp/linear_literal.h"
+#include "icsp/graph_literal.h"
 
 namespace csugar {
 
@@ -23,7 +26,7 @@ void Converter::Convert(bool incremental) {
     csp_.SetAllConverted();
 }
 void Converter::ConvertConstraint(std::shared_ptr<Expr> expr) {
-    std::vector<Clause> clauses = ConvertConstraint(expr, false);
+    std::vector<Clause> clauses = ConvertConstraint(expr, false, true);
     for (auto&& c : clauses) {
         icsp_.AddClause(c);
         if (config_.incremental_propagation) {
@@ -31,7 +34,7 @@ void Converter::ConvertConstraint(std::shared_ptr<Expr> expr) {
         }
     }
 }
-std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, bool negative) {
+std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, bool negative, bool top_level) {
     std::vector<Clause> clauses;
 
     while (true) {
@@ -49,10 +52,16 @@ std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, boo
             break;
         } else if (expr->type() == kAllDifferent) {
             expr = ConvertAllDifferent(expr);
+        } else if (expr->type() == kGraphActiveVerticesConnected) {
+            assert(top_level); // TODO
+            auto literal = ConvertGraphConstraints(expr);
+            clauses.push_back(Clause(literal));
+            break;
         } else if (expr->IsLogical()) {
             if (expr->type() == kNot) {
                 expr = (*expr)[0];
                 negative = !negative;
+                top_level = false;
                 continue;
             }
             expr = ConvertLogical(expr, negative, clauses);
@@ -131,6 +140,47 @@ std::shared_ptr<Expr> Converter::ConvertAllDifferent(std::shared_ptr<Expr> expr)
     }
     // TODO: optimization
     return std::make_shared<Expr>(kAnd, sub_exprs);
+}
+std::shared_ptr<Literal> Converter::ConvertGraphConstraints(std::shared_ptr<Expr> expr) {
+    auto retrieve_int_constant = [&](int index) {
+        assert(index < expr->size());
+        assert((*expr)[index]->type() == kConstantInt);
+        return (*expr)[index]->AsConstantInt();
+    };
+    if (expr->type() == kGraphActiveVerticesConnected) {
+        assert(expr->size() >= 2);
+
+        int n = retrieve_int_constant(0);
+        int m = retrieve_int_constant(1);
+        assert(expr->size() == 2 + n + 2 * m);
+
+        std::vector<std::shared_ptr<ICSPBoolVar>> vars;
+        std::vector<bool> is_negative;
+        std::vector<std::pair<int, int>> edges;
+
+        for (int i = 0; i < n; ++i) {
+            auto var = (*expr)[i + 2];
+            if (var->type() == kVariableBool) {
+                vars.push_back(ConvertBoolVar(var->AsBoolVar()));
+                is_negative.push_back(false);
+            } else if (var->type() == kNot) {
+                var = (*var)[0];
+                assert(var->type() == kVariableBool);
+                vars.push_back(ConvertBoolVar(var->AsBoolVar()));
+                is_negative.push_back(true);
+            } else abort();
+        }
+        for (int i = 0; i < m; ++i) {
+            int x = retrieve_int_constant(2 + n + i * 2);
+            int y = retrieve_int_constant(2 + n + i * 2 + 1);
+            edges.push_back({x, y});
+        }
+
+        return std::make_shared<GraphLiteral>(vars, is_negative, edges, kActiveVerticesConnectedLiteral);
+    } else {
+        // TODO
+        abort();
+    }
 }
 std::shared_ptr<Expr> Converter::ConvertComparison(std::shared_ptr<Expr> expr, bool negative, std::vector<Clause> &clauses) {
     // TODO: NORMALIZE_LINEARSUM?

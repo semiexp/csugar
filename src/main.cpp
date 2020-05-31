@@ -184,7 +184,6 @@ void FindAnswer(CSP& csp,
 
     Simplifier simp(icsp);
     simp.Simplify();
-
     if (icsp.IsUnsatisfiable()) {
         std::cout << "s UNSATISFIABLE" << std::endl;
         return;
@@ -193,7 +192,6 @@ void FindAnswer(CSP& csp,
     Mapping mapping(sat);
     Encoder enc(icsp, sat, mapping);
     enc.Encode();
-
     Solver solver(sat);
     auto sol = solver.Solve();
     if (sol.size() == 0) {

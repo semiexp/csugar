@@ -7,8 +7,8 @@ include(ExternalProject)
 set(MINISAT_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/minisat)
 
 ExternalProject_Add(minisat_project
-	GIT_REPOSITORY https://github.com/niklasso/minisat
-	GIT_TAG 37dc6c67e2af26379d88ce349eb9c4c6160e8543
+	GIT_REPOSITORY https://github.com/semiexp/minisat
+	GIT_TAG custom_constraints
 	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MINISAT_INSTALL_LOCATION} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
 )
 add_library(minisat_lib STATIC IMPORTED)

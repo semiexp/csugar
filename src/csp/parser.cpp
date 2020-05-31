@@ -41,6 +41,7 @@ const std::map<std::string, ExprType> kTokenToExprType = {
     {"-", kSub},
     {"if", kIf},
     {"alldifferent", kAllDifferent},
+    {"graph-active-vertices-connected", kGraphActiveVerticesConnected},
 };
 
 std::string NextToken(const std::string& s, int& p) {
