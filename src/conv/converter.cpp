@@ -50,6 +50,9 @@ std::vector<Clause> Converter::ConvertConstraint(std::shared_ptr<Expr> expr, boo
         } else if (expr->type() == kVariableBool) {
             clauses.push_back(Clause(std::make_shared<BoolLiteral>(ConvertBoolVar(expr->AsBoolVar()), negative)));
             break;
+        } else if (expr->type() == kInternalVariableBool) {
+            clauses.push_back(Clause(std::make_shared<BoolLiteral>(expr->AsInternalBoolVar(), negative)));
+            break;
         } else if (expr->type() == kAllDifferent) {
             expr = ConvertAllDifferent(expr);
         } else if (expr->type() == kGraphActiveVerticesConnected) {
@@ -159,16 +162,19 @@ std::shared_ptr<Literal> Converter::ConvertGraphConstraints(std::shared_ptr<Expr
         std::vector<std::pair<int, int>> edges;
 
         for (int i = 0; i < n; ++i) {
-            auto var = (*expr)[i + 2];
-            if (var->type() == kVariableBool) {
-                vars.push_back(ConvertBoolVar(var->AsBoolVar()));
+            auto e = (*expr)[i + 2];
+            if (e->type() == kVariableBool) {
+                vars.push_back(ConvertBoolVar(e->AsBoolVar()));
                 is_negative.push_back(false);
-            } else if (var->type() == kNot) {
-                var = (*var)[0];
-                assert(var->type() == kVariableBool);
-                vars.push_back(ConvertBoolVar(var->AsBoolVar()));
+            } else if (e->type() == kNot && (*e)[0]->type() == kVariableBool) {
+                vars.push_back(ConvertBoolVar((*e)[0]->AsBoolVar()));
                 is_negative.push_back(true);
-            } else abort();
+            } else {
+                auto v = icsp_.MakeBoolVar();
+                ConvertConstraint(Expr::Make(kIff, { Expr::InternalVarBool(v), e }));
+                vars.push_back(v);
+                is_negative.push_back(false);
+            }
         }
         for (int i = 0; i < m; ++i) {
             int x = retrieve_int_constant(2 + n + i * 2);

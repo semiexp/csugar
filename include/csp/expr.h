@@ -39,6 +39,7 @@ enum ExprType {
     kMax,
     kIf,
     kAllDifferent,
+    kInternalVariableBool,
     kInternalVariableInt,
     kGraphActiveVerticesConnected,
 };
@@ -57,6 +58,7 @@ public:
     bool AsConstantBool() const { return constant_bool_; }
     const CSPBoolVar& AsBoolVar() const { return bool_var_; }
     const CSPIntVar& AsIntVar() const { return int_var_; }
+    const std::shared_ptr<ICSPBoolVar>& AsInternalBoolVar() const { return icsp_bool_var_; }
     const std::shared_ptr<ICSPIntVar>& AsInternalIntVar() const { return icsp_int_var_; }
 
     bool IsLogical() const {
@@ -108,6 +110,11 @@ public:
         ret->int_var_ = var;
         return ret;
     }
+    static std::shared_ptr<Expr> InternalVarBool(const std::shared_ptr<ICSPBoolVar>& var) {
+        auto ret = Expr::Make(kInternalVariableBool);
+        ret->icsp_bool_var_ = var;
+        return ret;
+    }
     static std::shared_ptr<Expr> InternalVarInt(const std::shared_ptr<ICSPIntVar>& var) {
         auto ret = Expr::Make(kInternalVariableInt);
         ret->icsp_int_var_ = var;
@@ -119,6 +126,7 @@ private:
     std::vector<std::shared_ptr<Expr>> children_;
     CSPBoolVar bool_var_;
     CSPIntVar int_var_;
+    std::shared_ptr<ICSPBoolVar> icsp_bool_var_;
     std::shared_ptr<ICSPIntVar> icsp_int_var_;
     union {
         int constant_int_;
