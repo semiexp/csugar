@@ -67,7 +67,7 @@ private:
     }
     void UpdateNActiveClusters(int v) {
         if (n_active_clusters_ == v) return;
-        redo_.push_back({-1, v});
+        redo_.push_back({-1, n_active_clusters_});
         n_active_clusters_ = v;
     }
 
@@ -208,20 +208,6 @@ int ActiveVerticesConnected::buildTree(int v, int parent, int cluster_id) {
 }
 
 void ActiveVerticesConnected::calcReason(Solver& solver, Lit p, vec<Lit>& out_reason) {
-    int nn = lits_.size();
-    for (int i = 0; i < nn; ++i) {
-        if (var(lits_[i]) == var(p)) continue;
-        if (state_[i] == kActive) out_reason.push(lits_[i]);
-        else if (state_[i] == kInactive) out_reason.push(~lits_[i]);
-    }
-    if (p == lit_Undef && conflict_cause_pos_ != -1) out_reason.push(conflict_cause_lit_);
-    for (int i = 0; i < nn; ++i) {
-        if (state_[i] == kActive && solver.value(lits_[i]) != l_True) abort();
-        if (state_[i] == kInactive && solver.value(lits_[i]) != l_False) abort();
-    }
-    return;
-    // TODO: codes below compute more refiend reason, but it may cause performance drop
-    /*
     if (p == lit_Undef && conflict_cause_pos_ == -2) abort();
     if (p == lit_Undef && conflict_cause_pos_ != -1) {
         decision_order_.push_back(conflict_cause_pos_);
@@ -253,11 +239,6 @@ void ActiveVerticesConnected::calcReason(Solver& solver, Lit p, vec<Lit>& out_re
     if (union_find.NumActiveClusters() <= 1) {
         abort();
     }
-    if (p == lit_Undef && conflict_cause_pos_ != -1) {
-        decision_order_.pop_back();
-        state_[conflict_cause_pos_] = kUndecided;
-    }
-
     for (int i = decision_order_.size() - 1; i >= 0; --i) {
         int v = decision_order_[i];
         if (p != lit_Undef && var(p) == var(lits_[v])) {
@@ -278,7 +259,10 @@ void ActiveVerticesConnected::calcReason(Solver& solver, Lit p, vec<Lit>& out_re
             else if (state_[v] == kInactive) out_reason.push(~lits_[v]);
         }
     }
-    */
+    if (p == lit_Undef && conflict_cause_pos_ != -1) {
+        decision_order_.pop_back();
+        state_[conflict_cause_pos_] = kUndecided;
+    }
 }
 
 void ActiveVerticesConnected::undo(Solver& solver, Lit p) {
