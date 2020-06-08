@@ -98,7 +98,7 @@ std::string LinearSum::str() const {
     return ret;
 }
 int LinearSum::Factor() const {
-    int g = b_;
+    int g = abs(b_);
     for (auto it : coef_) {
         g = gcd(g, it.second);
     }
