@@ -20,7 +20,7 @@ public:
     int NumConstraints() const { return constraints_.size(); }
     const std::vector<SATLit>& GetClause(int i) const { return clauses_[i]; }
     const std::shared_ptr<NonClauseConstraint>& GetConstraint(int i) const { return constraints_[i]; }
-    int AddVariables(int n = 1) { n_variables_ += n; }
+    void AddVariables(int n = 1) { n_variables_ += n; }
     void AddClause(const std::vector<SATLit>& clause) { clauses_.push_back(clause); }
     void AddConstraint(std::shared_ptr<NonClauseConstraint> constraint) { constraints_.push_back(constraint); }
 

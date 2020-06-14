@@ -10,6 +10,16 @@
 
 namespace csugar {
 
+namespace {
+struct ICSPIntVarCompare
+{
+    inline bool operator()(const std::shared_ptr<ICSPIntVar>& a, const std::shared_ptr<ICSPIntVar>& b) const
+    {
+        return a->id() < b->id();
+    }
+};
+}
+
 class LinearSum {
 public:
     LinearSum(int b = 0) : coef_(), b_(b) {}
@@ -26,8 +36,8 @@ public:
     std::vector<LinearSum> Split(int s) const;
     bool IsSimple() const { return coef_.size() <= 1; }
 
-    const std::map<std::shared_ptr<ICSPIntVar>, int>& GetCoef() const { return coef_; }
-    std::map<std::shared_ptr<ICSPIntVar>, int>& GetCoef() { return coef_; }
+    const std::map<std::shared_ptr<ICSPIntVar>, int, ICSPIntVarCompare>& GetCoef() const { return coef_; }
+    std::map<std::shared_ptr<ICSPIntVar>, int, ICSPIntVarCompare>& GetCoef() { return coef_; }
     int GetB() const { return b_; }
 
     LinearSum& operator+=(const LinearSum& rhs) {
@@ -49,7 +59,7 @@ public:
 private:
     void WeightedAdd(const LinearSum& other, int w);
 
-    std::map<std::shared_ptr<ICSPIntVar>, int> coef_;
+    std::map<std::shared_ptr<ICSPIntVar>, int, ICSPIntVarCompare> coef_;
     int b_;
 };
 

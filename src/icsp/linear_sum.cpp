@@ -54,7 +54,7 @@ std::vector<std::shared_ptr<ICSPIntVar>> LinearSum::GetVariablesSorted() const {
         ret.push_back(p.first);
     }
     std::sort(ret.begin(), ret.end(), [](std::shared_ptr<ICSPIntVar>& l, std::shared_ptr<ICSPIntVar>& r) {
-        return l->domain()->size() < r->domain()->size();
+        return l->domain()->size() < r->domain()->size() || (l->domain()->size() == r->domain()->size() && l->id() < r->id());
     });
     return ret;
 }
