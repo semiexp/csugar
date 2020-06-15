@@ -54,7 +54,7 @@ std::string NextToken(const std::string& s, int& p) {
     }
     return ret;
 }
-std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p,
+std::shared_ptr<Expr> ParserSub(const std::string& s, int& p,
                                 const std::map<std::string, CSPBoolVar>& bool_map,
                                 const std::map<std::string, CSPIntVar>& int_map) {
     if (p >= s.size()) {
@@ -74,7 +74,7 @@ std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p,
                 break;
             } else if (s[p] == ' ') {
                 ++p;
-                auto sub = ParserSub(s, csp, p, bool_map, int_map);
+                auto sub = ParserSub(s, p, bool_map, int_map);
                 children.push_back(sub);
             } else {
                 throw ParseError("unexpected token");
@@ -104,11 +104,11 @@ std::shared_ptr<Expr> ParserSub(const std::string& s, CSP& csp, int& p,
 }
 }
 
-std::shared_ptr<Expr> StringToExpr(const std::string& s, CSP& csp,
+std::shared_ptr<Expr> StringToExpr(const std::string& s,
                                    const std::map<std::string, CSPBoolVar>& bool_map,
                                    const std::map<std::string, CSPIntVar>& int_map) {
     int p = 0;
-    return ParserSub(s, csp, p, bool_map, int_map);
+    return ParserSub(s, p, bool_map, int_map);
 }
 
 }

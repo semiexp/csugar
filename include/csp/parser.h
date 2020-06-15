@@ -17,7 +17,7 @@ public:
     ParseError(const std::string& str) : std::runtime_error(str) {}
 };
 
-std::shared_ptr<Expr> StringToExpr(const std::string& s, CSP& csp,
+std::shared_ptr<Expr> StringToExpr(const std::string& s,
                                    const std::map<std::string, CSPBoolVar>& bool_map,
                                    const std::map<std::string, CSPIntVar>& int_map);
 
