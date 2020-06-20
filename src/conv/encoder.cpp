@@ -94,7 +94,7 @@ SATLit Encoder::GetCode(std::shared_ptr<const Literal> literal) {
             if (sum.size() == 0) {
                 return sum.GetB() >= 0 ? sat_.True() : sat_.False();
             } else {
-                auto [v, a] = *sum.GetCoef().begin();
+                auto [v, a] = *sum.GetCoefs().begin();
                 return GetCodeLE(v, -a, sum.GetB());
             }
         } else if (linear_literal->op() == kLitLe) {
@@ -102,7 +102,7 @@ SATLit Encoder::GetCode(std::shared_ptr<const Literal> literal) {
             if (sum.size() == 0) {
                 return sum.GetB() <= 0 ? sat_.True() : sat_.False();
             } else {
-                auto [v, a] = *sum.GetCoef().begin();
+                auto [v, a] = *sum.GetCoefs().begin();
                 return GetCodeLE(v, a, -sum.GetB());
             }
         }
@@ -148,7 +148,7 @@ void Encoder::EncodeLinearLeLiteral(std::shared_ptr<LinearLiteral> literal, cons
 
         for (auto v : sum.GetVariablesSorted()) {
             vars.push_back(v);
-            as.push_back(sum.GetCoef()[v]);
+            as.push_back(sum.GetCoef(v));
         }
 
         std::vector<SATLit> clause2(n, sat_.False());
@@ -165,7 +165,7 @@ void Encoder::EncodeLinearNeLiteral(std::shared_ptr<LinearLiteral> literal, cons
 
     for (auto v : sum.GetVariablesSorted()) {
         vars.push_back(v);
-        as.push_back(sum.GetCoef()[v]);
+        as.push_back(sum.GetCoef(v));
     }
 
     std::vector<SATLit> clause2(n * 2, sat_.False());

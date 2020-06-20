@@ -21,7 +21,7 @@ public:
     bool IsSimple() const override { return true; }
     bool IsUnsatisfiable() const override { return false; }
 
-    std::string str() const {
+    std::string str() const override {
         if (negative_) return std::string("!b") + std::to_string(var_->id());
         else return std::string("b") + std::to_string(var_->id());
     }

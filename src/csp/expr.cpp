@@ -14,6 +14,8 @@ bool Expr::Equal(const std::shared_ptr<Expr>& lhs, const std::shared_ptr<Expr>& 
         return lhs->AsIntVar().id() == rhs->AsIntVar().id();
     } else if (lhs->type() == kInternalVariableInt) {
         return lhs->AsInternalIntVar() == rhs->AsInternalIntVar();
+    } else if (lhs->type() == kInternalVariableBool) {
+        return lhs->AsInternalBoolVar() == rhs->AsInternalBoolVar();
     }
     if (lhs->size() != rhs->size()) return false;
     for (int i = 0; i < lhs->size(); ++i) {

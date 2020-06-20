@@ -48,7 +48,7 @@ std::string LinearLiteral::str() const {
 }
 std::set<std::shared_ptr<ICSPIntVar>> LinearLiteral::IntVars() const {
     std::set<std::shared_ptr<ICSPIntVar>> ret;
-    for (auto coef_ : sum_.GetCoef()) {
+    for (auto coef_ : sum_.GetCoefs()) {
         ret.insert(coef_.first);
     }
     return ret;
@@ -59,7 +59,7 @@ std::pair<int, int> LinearLiteral::GetBound(std::shared_ptr<ICSPIntVar> v) const
     }
     auto& domain = v->domain();
     int lb = domain->GetLowerBound(), ub = domain->GetUpperBound();
-    int a = sum_.GetCoef().at(v);
+    int a = sum_.GetCoef(v);
 
     auto domain_other = sum_.GetDomainExcept(v);
     int lb_other = domain_other->GetLowerBound(), ub_other = domain_other->GetUpperBound();

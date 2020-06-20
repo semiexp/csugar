@@ -69,6 +69,13 @@ std::vector<LinearSum> LinearSum::Split(int s) const {
     }
     return ret;
 }
+std::vector<std::pair<std::shared_ptr<ICSPIntVar>, int>> LinearSum::GetCoefs() const {
+    std::vector<std::pair<std::shared_ptr<ICSPIntVar>, int>> ret;
+    for (auto term : coef_) {
+        ret.push_back({term.first, term.second});
+    }
+    return ret;
+}
 LinearSum& LinearSum::operator*=(int rhs) {
     if (rhs == 0) {
         b_ = 0;

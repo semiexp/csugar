@@ -27,8 +27,8 @@ public:
 
     std::string str() const override;
 
-    std::set<std::shared_ptr<ICSPIntVar>> IntVars() const;
-    std::pair<int, int> GetBound(std::shared_ptr<ICSPIntVar> v) const;
+    std::set<std::shared_ptr<ICSPIntVar>> IntVars() const override;
+    std::pair<int, int> GetBound(std::shared_ptr<ICSPIntVar> v) const override;
 
 private:
     LinearSum sum_;
