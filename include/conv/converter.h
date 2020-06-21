@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <map>
 
 #include "csp/csp.h"
 #include "csp/expr.h"
@@ -47,21 +48,12 @@ private:
     LinearSum ReduceArity(const LinearSum &e, LinearLiteralOp op);
     LinearSum SimplifyLinearExpression(const LinearSum& e, LinearLiteralOp op, bool first);
 
-    std::shared_ptr<ICSPIntVar> GetEquivalence(std::shared_ptr<Expr> x) {
-        // TODO
-        for (auto& p : cache_) {
-            if (Expr::Equal(x, p.first)) return p.second;
-        }
-        return std::shared_ptr<ICSPIntVar>(nullptr);
-    }
-    void AddEquivalence(std::shared_ptr<ICSPIntVar> v, std::shared_ptr<Expr> x) {
-        // TODO
-        cache_.push_back({x, v});
-    }
+    std::shared_ptr<ICSPIntVar> GetEquivalence(std::shared_ptr<Expr> x);
+    void AddEquivalence(std::shared_ptr<ICSPIntVar> v, std::shared_ptr<Expr> x);
 
     CSP& csp_;
     ICSP& icsp_;
-    std::vector<std::pair<std::shared_ptr<Expr>, std::shared_ptr<ICSPIntVar>>> cache_;
+    std::map<uint64_t, std::pair<std::shared_ptr<Expr>, std::shared_ptr<ICSPIntVar>>> cache_;
     std::vector<std::shared_ptr<ICSPBoolVar>> bool_var_conv_;
     std::vector<std::shared_ptr<ICSPIntVar>> int_var_conv_;
     Config config_;

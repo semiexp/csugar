@@ -24,4 +24,36 @@ bool Expr::Equal(const std::shared_ptr<Expr>& lhs, const std::shared_ptr<Expr>& 
     return true;
 }
 
+uint64_t Expr::Hash() const {
+    uint64_t hash_children;
+
+    switch (type_) {
+    case kConstantBool:
+        hash_children = (int)AsConstantBool();
+        break;
+    case kConstantInt:
+        hash_children = AsConstantInt();
+        break;
+    case kVariableBool:
+        hash_children = AsBoolVar().id();
+        break;
+    case kVariableInt:
+        hash_children = AsIntVar().id();
+        break;
+    case kInternalVariableBool:
+        hash_children = (uint64_t)AsInternalBoolVar().get();
+        break;
+    case kInternalVariableInt:
+        hash_children = (uint64_t)AsInternalIntVar().get();
+        break;
+    default:
+        hash_children = 0;
+        for (int i = 0; i < size(); ++i) {
+            hash_children += (1234567890123456ULL * i + 789012345678ULL) * children_[i]->Hash();
+        }
+    }
+    hash_children += type() * 456789012345678901ULL;
+    return hash_children;
+}
+
 }

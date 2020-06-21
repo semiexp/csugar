@@ -345,5 +345,21 @@ LinearSum Converter::SimplifyLinearExpression(const LinearSum& e, LinearLiteralO
     }
     return ret;
 }
+std::shared_ptr<ICSPIntVar> Converter::GetEquivalence(std::shared_ptr<Expr> x) {
+    uint64_t hash = x->Hash();
+    if (cache_.count(hash) > 0) {
+        auto [expr, var] = cache_[hash];
+        if (Expr::Equal(x, expr)) {
+            return var;
+        }
+    }
+    return std::shared_ptr<ICSPIntVar>(nullptr);
+}
+void Converter::AddEquivalence(std::shared_ptr<ICSPIntVar> v, std::shared_ptr<Expr> x) {
+    uint64_t hash = x->Hash();
+    if (cache_.count(hash) == 0) {
+        cache_.insert({hash, {x, v}});
+    }
+}
 
 }

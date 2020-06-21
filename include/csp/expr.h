@@ -68,6 +68,7 @@ public:
     bool IsComparison() const {
         return type_ == kEq || type_ == kNe || type_ == kLe || type_ == kLt || type_ == kGe || type_ == kGt;
     }
+    uint64_t Hash() const;
 
     static std::shared_ptr<Expr> Make(ExprType type) {
         return std::make_shared<Expr>(type);
