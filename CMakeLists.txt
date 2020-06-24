@@ -3,6 +3,11 @@ project(csugar CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
+if (USE_EMSCRIPTEN)
+	set(CMAKE_CXX_COMPILER em++)
+	set(CMAKE_CXX_FLAGS "-s ALLOW_MEMORY_GROWTH=1")
+endif()
+
 include(ExternalProject)
 set(MINISAT_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/minisat)
 
@@ -24,7 +29,14 @@ target_link_libraries(csugar_lib minisat_lib)
 set_target_properties(csugar_lib PROPERTIES OUTPUT_NAME "csugar")
 
 # csugar executable
+if (USE_EMSCRIPTEN)
+add_executable(csugar src/main_embind.cpp)
+set_target_properties(csugar PROPERTIES COMPILE_OPTIONS --bind)
+set_target_properties(csugar PROPERTIES LINK_FLAGS --bind)
+else()
 add_executable(csugar src/main.cpp)
+endif()
+
 target_include_directories(csugar PUBLIC ${PROJECT_SOURCE_DIR}/include ${MINISAT_INSTALL_LOCATION}/include)
 add_dependencies(csugar csugar_lib)
 target_link_libraries(csugar csugar_lib)
