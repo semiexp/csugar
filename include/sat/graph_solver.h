@@ -34,6 +34,7 @@ private:
     int next_rank_;
     Minisat::Lit conflict_cause_lit_;  // The conflict detected in propagate() is caused because `conflict_cause_pos_`-th variable was actually `conflict_cause_lit_`
     int conflict_cause_pos_;
+    int n_active_vertices_;
 };
 
 }

@@ -81,7 +81,7 @@ private:
 namespace Minisat {
 
 ActiveVerticesConnected::ActiveVerticesConnected(const std::vector<Lit>& lits, const std::vector<std::pair<int, int>>& edges)
-    : lits_(lits), adj_(lits.size()), state_(lits.size(), kUndecided), conflict_cause_pos_(-2),
+    : lits_(lits), adj_(lits.size()), state_(lits.size(), kUndecided), conflict_cause_pos_(-2), n_active_vertices_(0),
       rank_(lits.size()), lowlink_(lits.size()), subtree_active_count_(lits.size()), cluster_id_(lits.size()), parent_(lits.size()) {
     for (auto& e : edges) {
         adj_[e.first].push_back(e.second);
@@ -113,13 +113,17 @@ bool ActiveVerticesConnected::propagate(Solver& solver, Lit p) {
         if (var(lits_[i]) == var(p)) {
             lbool val = solver.value(lits_[i]);
             NodeState s;
-            if (val == l_True) s = kActive;
-            else if (val == l_False) s = kInactive;
+            if (val == l_True) {
+                s = kActive;
+                ++n_active_vertices_;
+            } else if (val == l_False) s = kInactive;
             else abort();
             state_[i] = s;
             decision_order_.push_back(i);
         }
     }
+
+    if (n_active_vertices_ == 0) return true;
 
     std::fill(rank_.begin(), rank_.end(), kUnvisited);
     std::fill(lowlink_.begin(), lowlink_.end(), kUndecided);
@@ -128,7 +132,7 @@ bool ActiveVerticesConnected::propagate(Solver& solver, Lit p) {
     std::fill(parent_.begin(), parent_.end(), -1);
     next_rank_ = 0;
 
-    int nonempty_cluster = -1;
+    int nonempty_cluster = -1, n_all_clusters = 0;
 
     for (int i = 0; i < n; ++i) {
         if (state_[i] != kInactive && rank_[i] == kUnvisited) {
@@ -140,9 +144,13 @@ bool ActiveVerticesConnected::propagate(Solver& solver, Lit p) {
                     return false; // already disconnected
                 }
                 nonempty_cluster = i;
+            } else {
+                ++n_all_clusters;
             }
         }
     }
+
+    if (n_active_vertices_ <= 1 && n_all_clusters <= 1) return true;
 
     if (nonempty_cluster != -1) {
         for (int v = 0; v < n; ++v) {
@@ -156,6 +164,7 @@ bool ActiveVerticesConnected::propagate(Solver& solver, Lit p) {
                     return false;
                 }
             } else {
+                if (n_active_vertices_ <= 1) continue;
                 // check if node `v` is an articulation point
                 int parent_side_count = subtree_active_count_[nonempty_cluster] - subtree_active_count_[v];
                 int n_nonempty_subgraph = 0;
@@ -268,6 +277,7 @@ void ActiveVerticesConnected::calcReason(Solver& solver, Lit p, vec<Lit>& out_re
 void ActiveVerticesConnected::undo(Solver& solver, Lit p) {
     for (int i = 0; i < lits_.size(); ++i) {
         if (var(lits_[i]) == var(p)) {
+            if (state_[i] == kActive) --n_active_vertices_;
             state_[i] = kUndecided;
             decision_order_.pop_back();
         }
