@@ -89,7 +89,7 @@ ActiveVerticesConnected::ActiveVerticesConnected(const std::vector<Lit>& lits, c
     }
 }
 
-void ActiveVerticesConnected::getWatchers(Solver& solver, vec<Lit>& out_watchers) {
+bool ActiveVerticesConnected::initialize(Solver& solver, vec<Lit>& out_watchers) {
     for (int i = 0; i < lits_.size(); ++i) {
         lbool val = solver.value(lits_[i]);
         if (val != l_Undef) decision_order_.push_back(i);
@@ -104,6 +104,19 @@ void ActiveVerticesConnected::getWatchers(Solver& solver, vec<Lit>& out_watchers
     for (Lit l : lits_unique) {
         out_watchers.push(l);
     }
+
+    std::set<Lit> propagate_lits;
+    for (int i = 0; i < lits_.size(); ++i) {
+        if (state_[i] == kActive) {
+            propagate_lits.insert(lits_[i]);
+        } else if (state_[i] == kInactive) {
+            propagate_lits.insert(~lits_[i]);
+        }
+    }
+    for (auto l : propagate_lits) {
+        if (!propagate(solver, l)) return false;
+    }
+    return true;
 }
 
 bool ActiveVerticesConnected::propagate(Solver& solver, Lit p) {

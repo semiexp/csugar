@@ -13,7 +13,7 @@ public:
     ActiveVerticesConnected(const std::vector<Lit> &lits, const std::vector<std::pair<int, int>> &edges);
     virtual ~ActiveVerticesConnected() = default;
 
-    void getWatchers(Solver& solver, vec<Lit>& out_watchers) override;
+    bool initialize(Solver& solver, vec<Lit>& out_watchers) override;
     bool propagate(Solver& solver, Lit p) override;
     void calcReason(Solver& solver, Lit p, vec<Lit>& out_reason) override;
     void undo(Solver& solver, Lit p) override;
