@@ -153,7 +153,17 @@ void Encoder::EncodeLinearLeLiteral(std::shared_ptr<LinearLiteral> literal, cons
 
         std::vector<SATLit> clause2(n, sat_.False());
         clause2.insert(clause2.end(), clause.begin(), clause.end());
-        EncodeLinearLe(as, vars, 0, sum.GetB(), clause2);
+
+        std::vector<VarSummary> summaries;
+        for (auto v : vars) {
+            VarSummary summary;
+            auto& domain = v->domain();
+            summary.lb = domain->GetLowerBound();
+            summary.ub = domain->GetUpperBound();
+            summary.domain = domain->Enumerate();
+            summaries.push_back(summary);
+        }
+        EncodeLinearLe(as, vars, summaries, 0, sum.GetB(), clause2);
     }
 }
 void Encoder::EncodeLinearNeLiteral(std::shared_ptr<LinearLiteral> literal, const std::vector<SATLit>& clause) {
@@ -184,6 +194,7 @@ void Encoder::EncodeLinearEqLiteral(std::shared_ptr<LinearLiteral> literal, cons
 }
 void Encoder::EncodeLinearLe(const std::vector<int>& as,
                              std::vector<std::shared_ptr<ICSPIntVar>>& vars,
+                             std::vector<VarSummary>& summary,
                              int idx,
                              int b,
                              std::vector<SATLit>& clause) {
@@ -197,11 +208,11 @@ void Encoder::EncodeLinearLe(const std::vector<int>& as,
         for (int j = idx + 1; j < vars.size(); ++j) {
             int a = as[j];
             if (a > 0) {
-                lb0 += a * vars[j]->domain()->GetLowerBound();
-                ub0 += a * vars[j]->domain()->GetUpperBound();
+                lb0 += a * summary[j].lb;
+                ub0 += a * summary[j].ub;
             } else {
-                lb0 += a * vars[j]->domain()->GetUpperBound();
-                ub0 += a * vars[j]->domain()->GetLowerBound();
+                lb0 += a * summary[j].ub;
+                ub0 += a * summary[j].lb;
             }
         }
         int a = as[idx];
@@ -212,28 +223,28 @@ void Encoder::EncodeLinearLe(const std::vector<int>& as,
         if (a > 0) {
             ub = std::min(ub, FloorDiv(-lb0, a));
             // TODO: efficient impl
-            for (int c : domain->Enumerate()) {
+            for (int c : summary[idx].domain) {
                 if (!(lb <= c && c <= ub)) continue;
                 clause[idx] = GetCodeLE(vars[idx], c - 1);
                 if (clause[idx] != sat_.True()) {
-                    EncodeLinearLe(as, vars, idx + 1, b + a * c, clause);
+                    EncodeLinearLe(as, vars, summary, idx + 1, b + a * c, clause);
                 }
             }
             clause[idx] = GetCodeLE(vars[idx], ub);
             if (clause[idx] != sat_.True()) {
-                EncodeLinearLe(as, vars, idx + 1, b + a * (ub + 1), clause);
+                EncodeLinearLe(as, vars, summary, idx + 1, b + a * (ub + 1), clause);
             }
         } else {
             lb = std::max(lb, CeilDiv(-lb0, a));
             clause[idx] = !GetCodeLE(vars[idx], lb - 1);
             if (clause[idx] != sat_.True()) {
-                EncodeLinearLe(as, vars, idx + 1, b + a * (lb - 1), clause);
+                EncodeLinearLe(as, vars, summary, idx + 1, b + a * (lb - 1), clause);
             }
-            for (int c : domain->Enumerate()) {
+            for (int c : summary[idx].domain) {
                 if (!(lb <= c && c <= ub)) continue;
                 clause[idx] = !GetCodeLE(vars[idx], c);
                 if (clause[idx] != sat_.True()) {
-                    EncodeLinearLe(as, vars, idx + 1, b + a * c, clause);
+                    EncodeLinearLe(as, vars, summary, idx + 1, b + a * c, clause);
                 }
             }
         }

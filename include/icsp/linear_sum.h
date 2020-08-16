@@ -3,6 +3,7 @@
 #include <memory>
 #include <map>
 #include <string>
+#include <algorithm>
 
 #include "csp/expr.h"
 #include "icsp/var.h"
@@ -20,6 +21,7 @@ public:
     int size() const { return coef_.size(); }
     std::unique_ptr<Domain> GetDomain() const { return GetDomainExcept(std::shared_ptr<ICSPIntVar>(nullptr)); }
     std::unique_ptr<Domain> GetDomainExcept(std::shared_ptr<ICSPIntVar> except) const;
+    std::pair<int, int> GetDomainRangeExcept(std::shared_ptr<ICSPIntVar> except) const;
     int GetExpectedDomainSize(bool exclude_largest, int threshold = 1048576) const;
     void Factorize();
     std::vector<std::shared_ptr<ICSPIntVar>> GetVariablesSorted() const;

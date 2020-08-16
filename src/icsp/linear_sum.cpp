@@ -31,6 +31,21 @@ std::unique_ptr<Domain> LinearSum::GetDomainExcept(std::shared_ptr<ICSPIntVar> e
     }
     return ret;
 }
+std::pair<int, int> LinearSum::GetDomainRangeExcept(std::shared_ptr<ICSPIntVar> except) const {
+    int low = b_, high = b_;
+    for (auto& it : coef_) {
+        if (it.first != except) {
+            if (it.second >= 0) {
+                low += it.first->domain()->GetLowerBound() * it.second;
+                high += it.first->domain()->GetUpperBound() * it.second;
+            } else {
+                low += it.first->domain()->GetUpperBound() * it.second;
+                high += it.first->domain()->GetLowerBound() * it.second;
+            }
+        }
+    }
+    return {low, high};
+}
 int LinearSum::GetExpectedDomainSize(bool exclude_largest, int threshold) const {
     int ret = 1;
     auto vars_sorted = GetVariablesSorted();

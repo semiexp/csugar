@@ -61,8 +61,7 @@ std::pair<int, int> LinearLiteral::GetBound(std::shared_ptr<ICSPIntVar> v) const
     int lb = domain->GetLowerBound(), ub = domain->GetUpperBound();
     int a = sum_.GetCoef(v);
 
-    auto domain_other = sum_.GetDomainExcept(v);
-    int lb_other = domain_other->GetLowerBound(), ub_other = domain_other->GetUpperBound();
+    auto [lb_other, ub_other] = sum_.GetDomainRangeExcept(v);
 
     if (op_ == kLitLe || op_ == kLitEq) {
         if (a > 0) ub = std::min(ub, FloorDiv(-lb_other, a));

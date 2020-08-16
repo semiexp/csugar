@@ -16,6 +16,11 @@
 
 namespace csugar {
 
+struct VarSummary {
+    int lb, ub;
+    std::vector<int> domain;
+};
+
 class Encoder {
 public:
     Encoder(ICSP& icsp, SAT& sat, Mapping& mapping) : icsp_(icsp), sat_(sat), mapping_(mapping) {}
@@ -49,6 +54,7 @@ private:
     // as[idx] * vars[idx] + ... + b <= 0
     void EncodeLinearLe(const std::vector<int>& as,
                         std::vector<std::shared_ptr<ICSPIntVar>>& vars,
+                        std::vector<VarSummary>& summary,
                         int idx,
                         int b,
                         std::vector<SATLit>& clause);
