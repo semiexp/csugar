@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 if (USE_EMSCRIPTEN)
 	set(CMAKE_CXX_COMPILER em++)
-	set(CMAKE_CXX_FLAGS "-s ALLOW_MEMORY_GROWTH=1 -s ENVIRONMENT=web -s WASM=0 --memory-init-file 0")
+	set(CMAKE_CXX_FLAGS "-s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s MODULARIZE=1 -s SINGLE_FILE=1 -s ENVIRONMENT=web --memory-init-file 0")
 endif()
 
 include(ExternalProject)
