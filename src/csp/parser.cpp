@@ -84,7 +84,7 @@ std::shared_ptr<Expr> ParserSub(const std::string& s, int& p,
     } else {
         std::string v = NextToken(s, p);
 
-        if ('0' <= v[0] && v[0] <= '9') {
+        if (('0' <= v[0] && v[0] <= '9') || v[0] == '-') {
             // integer
             return Expr::ConstInt(std::stoi(v));
         } else if (v == "true") {
