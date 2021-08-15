@@ -1,3 +1,5 @@
+#include "main.h"
+
 #include <string>
 #include <iostream>
 #include <utility>
@@ -27,10 +29,10 @@ bool IsComment(const std::string& s) {
     return s.size() >= 1 && s[0] == ';';
 }
 
-void InputCSP(IntegratedCSPSolver& solver, bool& has_answer_key, std::vector<std::string>& answer_keys) {
+void InputCSP(IntegratedCSPSolver& solver, bool& has_answer_key, std::vector<std::string>& answer_keys, std::istream &input) {
     std::string line;
 
-    while (std::getline(std::cin, line)) {
+    while (std::getline(input, line)) {
         if (line.size() == 0 || IsComment(line)) {
             continue;
         } else if (line[0] == '#') {
@@ -44,12 +46,12 @@ void InputCSP(IntegratedCSPSolver& solver, bool& has_answer_key, std::vector<std
 }
 
 void SolveIrrefutably(IntegratedCSPSolver& solver,
-                      std::vector<std::string>& answer_keys) {
+                      std::vector<std::string>& answer_keys, std::ostream &output) {
     CSPAnswer answer = solver.Solve();
     solver.SetTargetVars(answer_keys);
 
     if (!answer.IsSat()) {
-        std::cout << "unsat" << std::endl;
+        output << "unsat" << std::endl;
         return;
     }
 
@@ -61,7 +63,7 @@ void SolveIrrefutably(IntegratedCSPSolver& solver,
         } else if (solver.HasIntVar(name)) {
             not_refuted_int.insert({name, answer.GetInt(name)});
         } else {
-            std::cout << "variable " << name << " not found" << std::endl;
+            output << "variable " << name << " not found" << std::endl;
             return;
         }
     }
@@ -93,45 +95,45 @@ void SolveIrrefutably(IntegratedCSPSolver& solver,
             }
         }
     }
-    std::cout << "sat" << std::endl;
+    output << "sat" << std::endl;
     for (auto& p : not_refuted_bool) {
-        std::cout << p.first << ' ' << (p.second ? "true" : "false") << std::endl;
+        output << p.first << ' ' << (p.second ? "true" : "false") << std::endl;
     }
     for (auto& p : not_refuted_int) {
-        std::cout << p.first << ' ' << p.second << std::endl;
+        output << p.first << ' ' << p.second << std::endl;
     }
 }
 
-void FindAnswer(IntegratedCSPSolver& solver) {
+void FindAnswer(IntegratedCSPSolver& solver, std::ostream &output) {
     CSPAnswer answer = solver.Solve();
 
     if (!answer.IsSat()) {
-        std::cout << "s UNSATISFIABLE" << std::endl;
+        output << "s UNSATISFIABLE" << std::endl;
         return;
     }
 
-    std::cout << "s SATISFIABLE" << std::endl;
+    output << "s SATISFIABLE" << std::endl;
     auto bool_vars = solver.BoolVars();
     for (auto& var : bool_vars) {
-        std::cout << "a " << var << '\t' << (answer.GetBool(var) ? "true" : "false") << std::endl;
+        output << "a " << var << '\t' << (answer.GetBool(var) ? "true" : "false") << std::endl;
     }
     auto int_vars = solver.IntVars();
     for (auto& var : int_vars) {
-        std::cout << "a " << var << '\t' << answer.GetInt(var) << std::endl;
+        output << "a " << var << '\t' << answer.GetInt(var) << std::endl;
     }
-    std::cout << "a" << std::endl;
+    output << "a" << std::endl;
 }
 
 int main() {
     bool has_answer_key;
     std::vector<std::string> answer_keys;
     IntegratedCSPSolver solver;
-    InputCSP(solver, has_answer_key, answer_keys);
+    InputCSP(solver, has_answer_key, answer_keys, std::cin);
 
     if (has_answer_key) {
-        SolveIrrefutably(solver, answer_keys);
+        SolveIrrefutably(solver, answer_keys, std::cout);
     } else {
-        FindAnswer(solver);
+        FindAnswer(solver, std::cout);
     }
 
     return 0;
