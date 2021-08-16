@@ -2,8 +2,6 @@
 
 #include <vector>
 
-#include "minisat/core/Solver.h"
-
 #include "sat/satlit.h"
 
 namespace csugar { 
@@ -11,7 +9,7 @@ namespace csugar {
 std::vector<bool> Solver::Solve(bool incremental) {
     // TODO: incremental solver
     if (!actual_solver_ || !incremental) {
-        actual_solver_ = std::move(std::make_unique<Minisat::Solver>());
+        actual_solver_ = std::move(std::make_unique<BACKEND::Solver>());
     }
     for (int i = incremental ? sat_.NumSolvedVariables() : 0; i < sat_.NumVariables(); ++i) {
         actual_solver_->newVar();
@@ -23,11 +21,11 @@ std::vector<bool> Solver::Solve(bool incremental) {
             if (lit == SAT::True()) is_true = true;
         }
         if (is_true) continue;
-        Minisat::vec<Minisat::Lit> c;
+        BACKEND::vec<BACKEND::Lit> c;
         for (SATLit lit : clause) {
             if (lit != SAT::False()) {
                 //printf("%d ", (lit.IsNegative() ? -1 : 1) * (lit.GetVariable() + 1));
-                c.push(Minisat::mkLit(lit.GetVariable(), lit.IsNegative()));
+                c.push(BACKEND::mkLit(lit.GetVariable(), lit.IsNegative()));
             }
         }
         //printf("0\n");
@@ -48,7 +46,7 @@ std::vector<bool> Solver::Solve(bool incremental) {
     }
 
     std::vector<bool> ret(sat_.NumVariables());
-    Minisat::lbool ltrue((uint8_t)0);
+    BACKEND::lbool ltrue((uint8_t)0);
     for (int i = 0; i < sat_.NumVariables(); ++i) {
         ret[i] = (actual_solver_->model[i] == ltrue);
     }

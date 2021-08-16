@@ -78,7 +78,7 @@ private:
 
 }
 
-namespace Minisat {
+namespace BACKEND {
 
 ActiveVerticesConnected::ActiveVerticesConnected(const std::vector<Lit>& lits, const std::vector<std::pair<int, int>>& edges)
     : lits_(lits), adj_(lits.size()), state_(lits.size(), kUndecided), conflict_cause_pos_(-2), n_active_vertices_(0),

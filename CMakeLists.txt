@@ -12,15 +12,28 @@ endif()
 include(ExternalProject)
 set(MINISAT_INSTALL_LOCATION ${CMAKE_BINARY_DIR}/minisat)
 
-# minisat
-ExternalProject_Add(minisat_project
-	GIT_REPOSITORY https://github.com/semiexp/minisat
-	GIT_TAG custom_constraints
-	CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MINISAT_INSTALL_LOCATION} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-)
-add_library(minisat_lib STATIC IMPORTED)
-add_dependencies(minisat_lib minisat_project)
-set_property(TARGET minisat_lib PROPERTY IMPORTED_LOCATION ${MINISAT_INSTALL_LOCATION}/lib/libminisat.a)
+# minisat / glucose
+if (USE_GLUCOSE)
+  ExternalProject_Add(minisat_project
+      GIT_REPOSITORY https://github.com/semiexp/glucose
+      GIT_TAG 14401c6fa45687e0b68b1be1325696a305bb89c1
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MINISAT_INSTALL_LOCATION} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+  )
+  add_library(minisat_lib STATIC IMPORTED)
+  add_dependencies(minisat_lib minisat_project)
+  set_property(TARGET minisat_lib PROPERTY IMPORTED_LOCATION ${MINISAT_INSTALL_LOCATION}/lib/libglucose.a)
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_GLUCOSE")
+else()
+  ExternalProject_Add(minisat_project
+      GIT_REPOSITORY https://github.com/semiexp/minisat
+      GIT_TAG custom_constraints
+      CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${MINISAT_INSTALL_LOCATION} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+  )
+  add_library(minisat_lib STATIC IMPORTED)
+  add_dependencies(minisat_lib minisat_project)
+  set_property(TARGET minisat_lib PROPERTY IMPORTED_LOCATION ${MINISAT_INSTALL_LOCATION}/lib/libminisat.a)
+endif()
 
 # pybind11
 set(PYBIND_LOCATION ${CMAKE_BINARY_DIR}/pybind11)

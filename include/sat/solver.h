@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "sat/sat.h"
-#include "minisat/core/Solver.h"
+#include "sat/backend_switch.h"
 
 namespace csugar {
 
@@ -16,7 +16,12 @@ public:
 
 private:
     SAT &sat_;
+#ifdef USE_GLUCOSE
+    std::unique_ptr<Glucose::Solver> actual_solver_;
+#else
     std::unique_ptr<Minisat::Solver> actual_solver_;
+#endif
+
 };
 
 }

@@ -1,12 +1,11 @@
 #pragma once
 
-#include "minisat/core/Constraint.h"
-#include "minisat/core/Solver.h"
+#include "sat/backend_switch.h"
 
 #include <vector>
 #include <algorithm>
 
-namespace Minisat {
+namespace BACKEND {
 
 class ActiveVerticesConnected : public Constraint {
 public:
@@ -32,7 +31,7 @@ private:
     std::vector<int> decision_order_;
     std::vector<int> rank_, lowlink_, subtree_active_count_, cluster_id_, parent_;
     int next_rank_;
-    Minisat::Lit conflict_cause_lit_;  // The conflict detected in propagate() is caused because `conflict_cause_pos_`-th variable was actually `conflict_cause_lit_`
+    BACKEND::Lit conflict_cause_lit_;  // The conflict detected in propagate() is caused because `conflict_cause_pos_`-th variable was actually `conflict_cause_lit_`
     int conflict_cause_pos_;
     int n_active_vertices_;
 };
