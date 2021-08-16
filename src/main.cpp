@@ -125,7 +125,7 @@ void FindAnswer(IntegratedCSPSolver& solver, std::ostream &output) {
 }
 
 int main() {
-    bool has_answer_key;
+    bool has_answer_key = false;
     std::vector<std::string> answer_keys;
     IntegratedCSPSolver solver;
     InputCSP(solver, has_answer_key, answer_keys, std::cin);
