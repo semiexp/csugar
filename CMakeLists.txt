@@ -36,13 +36,16 @@ else()
 endif()
 
 # pybind11
-set(PYBIND_LOCATION ${CMAKE_BINARY_DIR}/pybind11)
-find_package(Git)
-execute_process(COMMAND
+if (USE_EMSCRIPTEN)
+else()
+  set(PYBIND_LOCATION ${CMAKE_BINARY_DIR}/pybind11)
+  find_package(Git)
+  execute_process(COMMAND
     ${GIT_EXECUTABLE} clone --depth=1 -b v2.7.0 https://github.com/pybind/pybind11.git ${PYBIND_LOCATION}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-)
-add_subdirectory(${PYBIND_LOCATION})
+  )
+  add_subdirectory(${PYBIND_LOCATION})
+endif()
 
 # csugar_lib
 file(GLOB_RECURSE MAIN ${PROJECT_SOURCE_DIR}/src/common/*.cpp ${PROJECT_SOURCE_DIR}/src/conv/*.cpp ${PROJECT_SOURCE_DIR}/src/csp/*.cpp ${PROJECT_SOURCE_DIR}/src/icsp/*.cpp ${PROJECT_SOURCE_DIR}/src/sat/*.cpp ${PROJECT_SOURCE_DIR}/src/integrated/*.cpp)
