@@ -92,7 +92,6 @@ ActiveVerticesConnected::ActiveVerticesConnected(const std::vector<Lit>& lits, c
 bool ActiveVerticesConnected::initialize(Solver& solver, vec<Lit>& out_watchers) {
     for (int i = 0; i < lits_.size(); ++i) {
         lbool val = solver.value(lits_[i]);
-        if (val != l_Undef) decision_order_.push_back(i);
         if (val == l_True) state_[i] = kActive;
         else if (val == l_False) state_[i] = kInactive;
     }
