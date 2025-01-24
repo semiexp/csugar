@@ -2,7 +2,7 @@
 
 #include <memory>
 #include <string>
-#include <exception>
+#include <stdexcept>
 #include <map>
 
 #include "csp/csp.h"
