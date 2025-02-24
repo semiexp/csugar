@@ -41,7 +41,7 @@ else()
   set(PYBIND_LOCATION ${CMAKE_BINARY_DIR}/pybind11)
   find_package(Git)
   execute_process(COMMAND
-    ${GIT_EXECUTABLE} clone --depth=1 -b v2.7.0 https://github.com/pybind/pybind11.git ${PYBIND_LOCATION}
+    ${GIT_EXECUTABLE} clone --depth=1 -b v2.13.6 https://github.com/pybind/pybind11.git ${PYBIND_LOCATION}
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   )
   add_subdirectory(${PYBIND_LOCATION})
